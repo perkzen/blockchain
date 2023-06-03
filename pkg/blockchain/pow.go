@@ -1,11 +1,7 @@
 package blockchain
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"encoding/binary"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -23,28 +19,22 @@ func NewProofOfWork(b *Block) *PoW {
 	}
 }
 
-func (p *PoW) getData(nonce int) []byte {
-	return bytes.Join([][]byte{
-		p.Block.PrevHash,
-		p.Block.Data,
-		toHex(int64(nonce)),
-		toHex(DIFFICULTY),
-	}, []byte{})
+func (p *PoW) calculateHash(nonce int) [32]byte {
+	p.Block.Nonce = nonce
+	return p.Block.Hash()
 }
 
-func (p *PoW) Mine() (hash [32]byte, nonce int) {
+func (p *PoW) Mine() (nonce int) {
 	nonce = 0
 	for {
-		data := p.getData(nonce)
-		hash := sha256.Sum256(data)
-
+		hash := p.calculateHash(nonce)
 		if isValid(hash) {
 			break
 		}
 		nonce++
 	}
 
-	return hash, nonce
+	return nonce
 }
 
 func isValid(hash [32]byte) bool {
@@ -54,17 +44,6 @@ func isValid(hash [32]byte) bool {
 }
 
 func (p *PoW) Validate(nonce int) bool {
-	data := p.getData(nonce)
-	hash := sha256.Sum256(data)
+	hash := p.calculateHash(nonce)
 	return isValid(hash)
-}
-
-func toHex(n int64) []byte {
-	buffer := new(bytes.Buffer)
-	err := binary.Write(buffer, binary.LittleEndian, n)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return buffer.Bytes()
 }

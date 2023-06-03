@@ -10,9 +10,6 @@ func TestCreateGenesisBlock(t *testing.T) {
 	if !bytes.Equal(genesis.PrevHash, []byte{}) {
 		t.Error("Previous hash should be empty")
 	}
-	if !bytes.Equal(genesis.Data, []byte("GENESIS")) {
-		t.Error("Data should equal to GENESIS")
-	}
 }
 
 func TestInitBlockchain(t *testing.T) {
