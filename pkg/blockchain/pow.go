@@ -33,7 +33,6 @@ func (p *PoW) Mine() (nonce int) {
 		}
 		nonce++
 	}
-
 	return nonce
 }
 

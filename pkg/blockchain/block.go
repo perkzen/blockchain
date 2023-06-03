@@ -8,15 +8,15 @@ import (
 )
 
 type Block struct {
-	PrevHash     []byte
+	PrevHash     [32]byte
 	Transactions []*Tx
 	Timestamp    int64
 	Nonce        int
 }
 
-func createBlock(prevHash []byte, tx *Tx) *Block {
+func NewBlock(prevHash [32]byte, transactions []*Tx) *Block {
 	b := &Block{
-		Transactions: []*Tx{tx},
+		Transactions: transactions,
 		PrevHash:     prevHash,
 		Timestamp:    time.Now().UnixNano(),
 		Nonce:        0,
@@ -31,15 +31,15 @@ func createBlock(prevHash []byte, tx *Tx) *Block {
 }
 
 func CreateGenesisBlock() *Block {
-	return createBlock([]byte{}, &Tx{})
+	return NewBlock([32]byte{}, []*Tx{})
 }
 
 func (b *Block) ToBytes() ([]byte, error) {
 	return json.Marshal(struct {
-		PrevHash     []byte `json:"prev_hash"`
-		Transactions []*Tx  `json:"transactions"`
-		Nonce        int    `json:"nonce"`
-		Timestamp    int64  `json:"timestamp"`
+		PrevHash     [32]byte `json:"prev_hash"`
+		Transactions []*Tx    `json:"transactions"`
+		Nonce        int      `json:"nonce"`
+		Timestamp    int64    `json:"timestamp"`
 	}{
 		PrevHash:     b.PrevHash,
 		Transactions: b.Transactions,

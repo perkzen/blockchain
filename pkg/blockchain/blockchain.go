@@ -2,11 +2,17 @@ package blockchain
 
 type Blockchain struct {
 	Blocks []*Block
+	TxPool []*Tx
 }
 
-func (chain *Blockchain) AddBlock(tx *Tx) {
-	prevHash := chain.lastBlock().PrevHash
-	chain.Blocks = append(chain.Blocks, createBlock(prevHash, tx))
+func (chain *Blockchain) AddBlock() {
+	prevHash := chain.lastBlock().Hash()
+	chain.Blocks = append(chain.Blocks, NewBlock(prevHash, chain.TxPool))
+	chain.TxPool = []*Tx{}
+}
+
+func (chain *Blockchain) AddTransaction(sender string, recipient string, value float32) {
+	chain.TxPool = append(chain.TxPool, NewTransaction(sender, recipient, value))
 }
 
 func (chain *Blockchain) lastBlock() *Block {
@@ -14,5 +20,5 @@ func (chain *Blockchain) lastBlock() *Block {
 }
 
 func InitBlockchain() *Blockchain {
-	return &Blockchain{[]*Block{CreateGenesisBlock()}}
+	return &Blockchain{Blocks: []*Block{CreateGenesisBlock()}, TxPool: []*Tx{}}
 }
