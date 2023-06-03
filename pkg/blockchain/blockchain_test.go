@@ -73,7 +73,7 @@ func TestBlockchain_Mining(t *testing.T) {
 func TestBlockchain_CalculateTotalAmount(t *testing.T) {
 	chain := InitBlockchain("")
 	chain.AddTransaction("A", "B", 1)
-	chain.AddTransaction("A", "B", 1)
+	chain.AddTransaction("B", "A", 1)
 	total := chain.CalculateTotalAmount("A")
 	if total != 0 {
 		t.Error("Total amount should equal 0")
