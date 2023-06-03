@@ -1,12 +1,42 @@
 package wallet
 
+import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"fmt"
+	"log"
+)
+
 type Wallet struct {
+	privateKey *ecdsa.PrivateKey
+	publicKey  *ecdsa.PublicKey
 }
 
-func NewWallet() {
-	// generate key pair
+func NewWallet() *Wallet {
+	private, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		log.Panic(err)
+	}
 
-	// return wallet address
+	return &Wallet{
+		privateKey: private,
+		publicKey:  &private.PublicKey,
+	}
 }
 
-func newKeyPair() {}
+func (w *Wallet) PrivateKey() *ecdsa.PrivateKey {
+	return w.privateKey
+}
+
+func (w *Wallet) PrivateKeyStr() string {
+	return fmt.Sprintf("%x", w.privateKey.D.Bytes())
+}
+
+func (w *Wallet) PublicKey() *ecdsa.PublicKey {
+	return w.publicKey
+}
+
+func (w *Wallet) PublicKeyStr() string {
+	return fmt.Sprintf("%x%x", w.publicKey.X.Bytes(), w.publicKey.Y.Bytes())
+}
