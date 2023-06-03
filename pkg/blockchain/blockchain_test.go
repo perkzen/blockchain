@@ -69,3 +69,13 @@ func TestBlockchain_Mining(t *testing.T) {
 		t.Error("Mining sender should equal THE BLOCKCHAIN")
 	}
 }
+
+func TestBlockchain_CalculateTotalAmount(t *testing.T) {
+	chain := InitBlockchain("")
+	chain.AddTransaction("A", "B", 1)
+	chain.AddTransaction("A", "B", 1)
+	total := chain.CalculateTotalAmount("A")
+	if total != 0 {
+		t.Error("Total amount should equal 0")
+	}
+}
