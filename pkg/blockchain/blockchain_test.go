@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"blockchain/pkg/wallet"
 	"fmt"
 	"testing"
 )
@@ -31,7 +32,15 @@ func TestBlockchain_AddBlock(t *testing.T) {
 
 func TestBlockchain_AddTransaction(t *testing.T) {
 	chain := InitBlockchain("")
-	chain.AddTransaction("A", "B", 1)
+	walletA := wallet.NewWallet()
+	walletB := wallet.NewWallet()
+	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
+	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx.GenerateSignature(), walletA.PublicKey())
+
+	if !isAdd {
+		t.Error("Tx should be added to tx pool")
+	}
+
 	if len(chain.TxPool) < 1 {
 		t.Error("Chain should have 1 transaction in pool")
 	}
@@ -39,7 +48,15 @@ func TestBlockchain_AddTransaction(t *testing.T) {
 
 func TestBlockchain_ClearPool(t *testing.T) {
 	chain := InitBlockchain("")
-	chain.AddTransaction("A", "B", 1)
+	walletA := wallet.NewWallet()
+	walletB := wallet.NewWallet()
+	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
+	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx.GenerateSignature(), walletA.PublicKey())
+
+	if !isAdd {
+		t.Error("Tx should be added to tx pool")
+	}
+
 	chain.AddBlock()
 	if len(chain.Blocks) <= 1 {
 		t.Error("Chain should have more than 1 block")
@@ -72,8 +89,11 @@ func TestBlockchain_Mining(t *testing.T) {
 
 func TestBlockchain_CalculateTotalAmount(t *testing.T) {
 	chain := InitBlockchain("")
-	chain.AddTransaction("A", "B", 1)
-	chain.AddTransaction("B", "A", 1)
+	walletA := wallet.NewWallet()
+	walletB := wallet.NewWallet()
+	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
+	chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx.GenerateSignature(), walletA.PublicKey())
+
 	total := chain.CalculateTotalAmount("A")
 	if total != 0 {
 		t.Error("Total amount should equal 0")

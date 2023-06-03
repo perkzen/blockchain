@@ -1,10 +1,12 @@
 package wallet
 
 import (
+	"blockchain/pkg/utils"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"golang.org/x/crypto/ripemd160"
@@ -88,4 +90,43 @@ func (w *Wallet) PublicKeyStr() string {
 
 func (w *Wallet) BlockchainAddress() string {
 	return w.address
+}
+
+// tx wallet?
+
+type Tx struct {
+	senderPublicKey  *ecdsa.PublicKey
+	senderPrivateKey *ecdsa.PrivateKey
+	senderAddr       string
+	recipientAddr    string
+	value            float32
+}
+
+func NewTransaction(privateKey *ecdsa.PrivateKey, publicKey *ecdsa.PublicKey, sender string, recipient string, value float32) *Tx {
+	return &Tx{
+		senderPrivateKey: privateKey,
+		senderPublicKey:  publicKey,
+		senderAddr:       sender,
+		recipientAddr:    recipient,
+		value:            value,
+	}
+}
+
+func (tx *Tx) ToBytes() ([]byte, error) {
+	return json.Marshal(struct {
+		Sender    string  `json:"sender_address"`
+		Recipient string  `json:"recipient_address"`
+		Value     float32 `json:"value"`
+	}{
+		Sender:    tx.senderAddr,
+		Recipient: tx.recipientAddr,
+		Value:     tx.value,
+	})
+}
+
+func (tx *Tx) GenerateSignature() *utils.Signature {
+	t, _ := tx.ToBytes()
+	h := sha256.Sum256(t)
+	r, s, _ := ecdsa.Sign(rand.Reader, tx.senderPrivateKey, h[:])
+	return &utils.Signature{R: r, S: s}
 }
