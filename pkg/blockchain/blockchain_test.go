@@ -91,10 +91,14 @@ func TestBlockchain_CalculateTotalAmount(t *testing.T) {
 	chain := InitBlockchain("")
 	walletA := wallet.NewWallet()
 	walletB := wallet.NewWallet()
-	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
-	chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx.GenerateSignature(), walletA.PublicKey())
 
-	total := chain.CalculateTotalAmount("A")
+	tx1 := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
+	chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx1.GenerateSignature(), walletA.PublicKey())
+
+	tx2 := wallet.NewTransaction(walletB.PrivateKey(), walletB.PublicKey(), walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0)
+	chain.AddTransaction(walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0, tx2.GenerateSignature(), walletB.PublicKey())
+
+	total := chain.CalculateTotalAmount(walletA.BlockchainAddress())
 	if total != 0 {
 		t.Error("Total amount should equal 0")
 	}
