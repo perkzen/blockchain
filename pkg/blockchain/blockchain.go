@@ -1,8 +1,6 @@
 package blockchain
 
 import (
-	"bytes"
-	"crypto/sha256"
 	"time"
 )
 
@@ -11,26 +9,26 @@ type Block struct {
 	PrevHash  []byte
 	Data      []byte
 	Timestamp int64
+	Nonce     int
 }
 
 type Blockchain struct {
 	Blocks []*Block
 }
 
-func (b *Block) generateBlockHash() {
-	data := bytes.Join([][]byte{b.PrevHash, b.Data}, []byte{})
-	hash := sha256.Sum256(data)
-	b.Hash = hash[:]
-}
-
 func createBlock(prevHash []byte, data string) *Block {
 	b := &Block{
 		Data:      []byte(data),
 		PrevHash:  prevHash,
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now().UnixNano(),
+		Nonce:     0,
 	}
 
-	b.generateBlockHash()
+	pow := NewProofOfWork(b)
+	hash, nonce := pow.Mine()
+
+	b.Nonce = nonce
+	b.Hash = hash[:]
 
 	return b
 }
@@ -40,8 +38,12 @@ func CreateGenesisBlock() *Block {
 }
 
 func (chain *Blockchain) AddBlock(data string) {
-	prevHash := chain.Blocks[len(chain.Blocks)-1].PrevHash
+	prevHash := chain.lastBlock().PrevHash
 	chain.Blocks = append(chain.Blocks, createBlock(prevHash, data))
+}
+
+func (chain *Blockchain) lastBlock() *Block {
+	return chain.Blocks[len(chain.Blocks)-1]
 }
 
 func InitBlockchain() *Blockchain {
