@@ -13,7 +13,7 @@ func TestPoW_ValidateReturnsTrue(t *testing.T) {
 		Nonce:        0,
 	})
 
-	nonce := pow.Mine()
+	nonce := pow.Proof()
 
 	if !pow.Validate(nonce) {
 		t.Error("Validate should equal to true")

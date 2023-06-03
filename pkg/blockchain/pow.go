@@ -5,9 +5,13 @@ import (
 	"strings"
 )
 
-// DIFFICULTY
+// MINING_DIFFICULTY
 // determines the number of zeros on the beginning of the hash
-const DIFFICULTY = 4
+const (
+	MINING_DIFFICULTY = 4
+	MINING_SENDER     = "THE BLOCKCHAIN"
+	MINING_REWARD     = 0.1
+)
 
 type PoW struct {
 	Block *Block
@@ -24,13 +28,9 @@ func (p *PoW) calculateHash(nonce int) [32]byte {
 	return p.Block.Hash()
 }
 
-func (p *PoW) Mine() (nonce int) {
+func (p *PoW) Proof() (nonce int) {
 	nonce = 0
-	for {
-		hash := p.calculateHash(nonce)
-		if isValid(hash) {
-			break
-		}
+	for !p.Validate(nonce) {
 		nonce++
 	}
 	return nonce
@@ -38,8 +38,8 @@ func (p *PoW) Mine() (nonce int) {
 
 func isValid(hash [32]byte) bool {
 	guess := fmt.Sprintf("%x", hash)
-	zeros := strings.Repeat("0", DIFFICULTY)
-	return guess[:DIFFICULTY] == zeros
+	zeros := strings.Repeat("0", MINING_DIFFICULTY)
+	return guess[:MINING_DIFFICULTY] == zeros
 }
 
 func (p *PoW) Validate(nonce int) bool {

@@ -18,14 +18,15 @@ func NewBlock(prevHash [32]byte, transactions []*Tx) *Block {
 	b := &Block{
 		Transactions: transactions,
 		PrevHash:     prevHash,
-		Timestamp:    time.Now().UnixNano(),
+		Timestamp:    0,
 		Nonce:        0,
 	}
 
 	pow := NewProofOfWork(b)
-	nonce := pow.Mine()
+	nonce := pow.Proof()
 
 	b.Nonce = nonce
+	b.Timestamp = time.Now().UnixNano()
 
 	return b
 }

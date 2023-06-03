@@ -10,8 +10,8 @@ type Tx struct {
 
 func NewTransaction(sender string, recipient string, value float32) *Tx {
 	return &Tx{
-		recipientAddr: recipient,
 		senderAddr:    sender,
+		recipientAddr: recipient,
 		value:         value,
 	}
 }
