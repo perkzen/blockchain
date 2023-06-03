@@ -16,7 +16,7 @@ func NewTransaction(sender string, recipient string, value float32) *Tx {
 	}
 }
 
-func (tx *Tx) ToBytes() ([]byte, error) {
+func (tx *Tx) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Sender    string  `json:"sender_address"`
 		Recipient string  `json:"recipient_address"`

@@ -1,18 +1,18 @@
 package main
 
 import (
-	"blockchain/pkg/blockchain"
-	"blockchain/pkg/wallet"
-	"fmt"
+	"blockchain/pkg/network"
+	"flag"
+	"log"
 )
 
-func main() {
-	walletM := wallet.NewWallet()
-	walletA := wallet.NewWallet()
-	walletB := wallet.NewWallet()
+func init() {
+	log.SetPrefix("Blockchain: ")
+}
 
-	t := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
-	bc := blockchain.InitBlockchain(walletM.BlockchainAddress())
-	isAdd := bc.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, t.GenerateSignature(), walletA.PublicKey())
-	fmt.Println(isAdd)
+func main() {
+	port := flag.Uint("port", 3000, "TCP Port Number for Blockchain server")
+	flag.Parse()
+	app := network.NewBlockchainServer(uint16(*port))
+	app.Run()
 }
