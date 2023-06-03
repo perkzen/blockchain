@@ -4,5 +4,5 @@
 ## TODO
  - [X] Proof of work
  - [ ] Peer to peer network
- - [ ] Wallet
- - [ ] Transactions
+ - [x] Wallet
+ - [x] Transactions

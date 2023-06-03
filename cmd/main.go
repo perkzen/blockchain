@@ -1,9 +1,9 @@
 package main
 
 import (
-	"blockchain/pkg/network"
-	"flag"
+	"blockchain/pkg/cli"
 	"log"
+	"os"
 )
 
 func init() {
@@ -11,8 +11,7 @@ func init() {
 }
 
 func main() {
-	port := flag.Uint("port", 3000, "TCP Port Number for Blockchain server")
-	flag.Parse()
-	app := network.NewBlockchainServer(uint16(*port))
-	app.Run()
+	defer os.Exit(0)
+	cmd := cli.CommandLine{}
+	cmd.Run()
 }
