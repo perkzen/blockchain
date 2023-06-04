@@ -30,10 +30,10 @@ func (chain *Blockchain) AddTransaction(sender string, recipient string, value f
 	}
 
 	if chain.VerifyTxSignature(senderPublicKey, s, tx) {
-		//if chain.CalculateTotalAmount(sender) < value {
-		//	log.Printf("ERROR: Insufficient funds")
-		//	return false
-		//}
+		if chain.CalculateTotalAmount(sender) < value {
+			log.Printf("ERROR: Insufficient funds")
+			return false
+		}
 
 		chain.txPool = append(chain.txPool, tx)
 		return true
@@ -51,12 +51,14 @@ func (chain *Blockchain) VerifyTxSignature(senderPublicKey *ecdsa.PublicKey, s *
 
 func (chain *Blockchain) CalculateTotalAmount(addr string) float32 {
 	var total float32 = 0.0
-	for _, tx := range chain.txPool {
-		if addr == tx.recipientAddr {
-			total += tx.value
-		}
-		if addr == tx.senderAddr {
-			total -= tx.value
+	for _, block := range chain.blocks {
+		for _, tx := range block.Transactions {
+			if addr == tx.recipientAddr {
+				total += tx.value
+			}
+			if addr == tx.senderAddr {
+				total -= tx.value
+			}
 		}
 	}
 	return total

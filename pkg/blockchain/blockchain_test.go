@@ -67,9 +67,11 @@ func TestBlockchain_ClearPool(t *testing.T) {
 }
 
 func TestBlockchain_Mining(t *testing.T) {
-	chain := InitBlockchain("", 3000)
+	miner := wallet.NewWallet()
+	chain := InitBlockchain(miner.BlockchainAddress(), 3000)
 	chain.Mining()
 	lastBlock := chain.lastBlock()
+
 	if len(chain.blocks) <= 1 {
 		t.Error("Chain should have more than 1 block")
 	}
@@ -85,6 +87,9 @@ func TestBlockchain_Mining(t *testing.T) {
 	if lastBlock.Transactions[0].senderAddr != MINING_SENDER {
 		t.Error("Mining sender should equal THE BLOCKCHAIN")
 	}
+	if chain.CalculateTotalAmount(miner.BlockchainAddress()) != 0.1 {
+		t.Error("Miner should have received mining reward")
+	}
 }
 
 func TestBlockchain_CalculateTotalAmount(t *testing.T) {
@@ -95,10 +100,18 @@ func TestBlockchain_CalculateTotalAmount(t *testing.T) {
 	chain.Mining()
 
 	tx1 := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
-	chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx1.GenerateSignature(), walletA.PublicKey())
+	isAdded := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx1.GenerateSignature(), walletA.PublicKey())
+
+	if isAdded {
+		t.Error("Invalid transaction")
+	}
 
 	tx2 := wallet.NewTransaction(walletB.PrivateKey(), walletB.PublicKey(), walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0)
-	chain.AddTransaction(walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0, tx2.GenerateSignature(), walletB.PublicKey())
+	isAdded = chain.AddTransaction(walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0, tx2.GenerateSignature(), walletB.PublicKey())
+
+	if isAdded {
+		t.Error("Invalid transaction")
+	}
 
 	total := chain.CalculateTotalAmount(walletA.BlockchainAddress())
 	if total != 0 {
