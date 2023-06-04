@@ -7,7 +7,7 @@ import (
 func TestWallet_BlockchainAddress(t *testing.T) {
 	w := NewWallet()
 	if len(w.BlockchainAddress()) != 34 {
-		t.Error("Blockchain address should be 32 characters long")
+		t.Error("Blockchain address should be 34 characters long")
 	}
 }
 
@@ -27,8 +27,8 @@ func TestWallet_PublicKey(t *testing.T) {
 
 func TestWallet_PrivateKeyStr(t *testing.T) {
 	w := NewWallet()
-	if len(w.PrivateKeyStr()) != 34 {
-		t.Error("Private key string should be 34 characters long")
+	if len(w.PrivateKeyStr()) != 64 {
+		t.Error("Private key string should be 64 characters long")
 	}
 }
 
