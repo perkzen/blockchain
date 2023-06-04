@@ -16,6 +16,10 @@ func NewTransaction(sender string, recipient string, value float32) *Tx {
 	}
 }
 
+func (tx *Tx) isCoinbase() bool {
+	return tx.senderAddr == MINING_SENDER
+}
+
 func (tx *Tx) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Sender    string  `json:"sender_address"`
