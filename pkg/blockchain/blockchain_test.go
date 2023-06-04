@@ -120,3 +120,22 @@ func TestBlockchain_CalculateTotalAmount(t *testing.T) {
 		t.Error("Total amount should equal 0")
 	}
 }
+
+func TestBlockchain_VerifyTxSignature(t *testing.T) {
+	chain := InitBlockchain("", 3000)
+	walletA := wallet.NewWallet()
+	walletB := wallet.NewWallet()
+	tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
+	signature := tx.GenerateSignature(walletA.PrivateKey())
+	isValid := chain.VerifyTxSignature(walletA.PublicKey(), signature, tx)
+
+	if !isValid {
+		t.Error("Transaction signature should be valid")
+	}
+
+	isValid = chain.VerifyTxSignature(walletB.PublicKey(), signature, tx)
+
+	if isValid {
+		t.Error("Transaction signature should not be valid")
+	}
+}
