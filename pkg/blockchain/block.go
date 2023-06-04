@@ -32,10 +32,6 @@ func NewBlock(prevHash [32]byte, transactions []*Tx) *Block {
 	return b
 }
 
-func CreateGenesisBlock() *Block {
-	return NewBlock([32]byte{}, []*Tx{})
-}
-
 func (b *Block) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		PrevHash     string `json:"prev_hash"`

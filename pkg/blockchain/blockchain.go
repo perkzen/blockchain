@@ -5,9 +5,12 @@ import (
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"log"
 )
 
+// Blockchain
+// address: address of the node (miner)
 type Blockchain struct {
 	blocks   []*Block
 	txPool   []*Tx
@@ -19,24 +22,18 @@ type Blockchain struct {
 
 func (chain *Blockchain) AddBlock() {
 	prevHash := chain.lastBlock().Hash()
-	chain.blocks = append(chain.blocks, NewBlock(prevHash, chain.txPool))
+	txPool := append([]*Tx{CoinbaseTx(chain.address)}, chain.txPool...)
+	chain.blocks = append(chain.blocks, NewBlock(prevHash, txPool))
 	chain.txPool = []*Tx{}
 }
 
 func (chain *Blockchain) AddTransaction(sender string, recipient string, value float32, s *utils.Signature, senderPublicKey *ecdsa.PublicKey) bool {
-	tx := NewTransaction(sender, recipient, value)
-
+	tx := NewTransaction(sender, recipient, value, chain)
 	if tx.isCoinbase() {
 		chain.txPool = append(chain.txPool, tx)
 		return true
 	}
-
 	if chain.VerifyTxSignature(senderPublicKey, s, tx) {
-		if chain.CalculateTotalAmount(sender) < value {
-			log.Printf("ERROR: Insufficient funds")
-			return false
-		}
-
 		chain.txPool = append(chain.txPool, tx)
 		return true
 	} else {
@@ -51,34 +48,93 @@ func (chain *Blockchain) VerifyTxSignature(senderPublicKey *ecdsa.PublicKey, s *
 	return ecdsa.Verify(senderPublicKey, hash[:], s.R, s.S)
 }
 
-func (chain *Blockchain) CalculateTotalAmount(addr string) float32 {
-	var total float32 = 0.0
-	for _, block := range chain.blocks {
-		for _, tx := range block.Transactions {
-			if addr == tx.recipientAddr {
-				total += tx.value
-			}
-			if addr == tx.senderAddr {
-				total -= tx.value
-			}
-		}
-	}
-	return total
-}
-
 func (chain *Blockchain) lastBlock() *Block {
 	return chain.blocks[len(chain.blocks)-1]
 }
 
-func (chain *Blockchain) Mining() bool {
-	chain.AddTransaction(MINING_SENDER, chain.address, MINING_REWARD, nil, nil)
+func CreateGenesisBlock(addr string) *Block {
+	return NewBlock([32]byte{}, []*Tx{CoinbaseTx(addr)})
+}
+
+func (chain *Blockchain) MineBlock() {
 	chain.AddBlock()
-	return true
+}
+
+func (chain *Blockchain) FindUnspentTxs(address string) []Tx {
+	var utxo []Tx
+	spentTXOs := make(map[string][]int)
+
+	for _, block := range chain.blocks {
+		for _, tx := range block.Transactions {
+			txID := fmt.Sprintf("%x", tx.ID)
+		Outputs:
+			for outIdx, txOut := range tx.TxOutputs {
+				if spentTXOs[txID] != nil {
+					for _, spent := range spentTXOs[txID] {
+						if spent == outIdx {
+							continue Outputs
+						}
+					}
+				}
+				if txOut.CanBeUnlocked(address) {
+					utxo = append(utxo, *tx)
+				}
+			}
+			if !tx.isCoinbase() {
+				for _, txIn := range tx.TxInputs {
+					if txIn.CanUnlock(address) {
+						inTxID := fmt.Sprintf("%x", txIn.ID)
+						spentTXOs[inTxID] = append(spentTXOs[inTxID], txIn.OutIdx)
+					}
+				}
+			}
+		}
+		if len(block.PrevHash[:]) == 0 {
+			break
+		}
+	}
+	return utxo
+}
+
+func (chain *Blockchain) FindUTXO(address string) []TxOutput {
+	var UTXOs []TxOutput
+	txs := chain.FindUnspentTxs(address)
+
+	for _, tx := range txs {
+		for _, out := range tx.TxOutputs {
+			if out.CanBeUnlocked(address) {
+				UTXOs = append(UTXOs, out)
+			}
+		}
+	}
+	return UTXOs
+}
+
+func (chain *Blockchain) FindSpendableOutputs(address string, amount float32) (float32, map[string][]int) {
+	unspentOutputs := make(map[string][]int)
+	unspentTxs := chain.FindUnspentTxs(address)
+	accumulated := float32(0.0)
+
+Work:
+	for _, tx := range unspentTxs {
+		txID := fmt.Sprintf("%x", tx.ID)
+		for outIdx, out := range tx.TxOutputs {
+			if out.CanBeUnlocked(address) && accumulated < amount {
+				accumulated += out.Value
+				unspentOutputs[txID] = append(unspentOutputs[txID], outIdx)
+				if accumulated >= amount {
+					break Work
+				}
+			}
+		}
+	}
+
+	return accumulated, unspentOutputs
 }
 
 func InitBlockchain(addr string, port uint16) *Blockchain {
 	return &Blockchain{
-		blocks:   []*Block{CreateGenesisBlock()},
+		blocks:   []*Block{CreateGenesisBlock(addr)},
 		txPool:   []*Tx{},
 		address:  addr,
 		port:     port,

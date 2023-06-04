@@ -6,34 +6,47 @@ import (
 )
 
 func TestNewTransaction(t *testing.T) {
-	tx := NewTransaction("sender", "recipient", 0.1)
-	if tx.senderAddr != "sender" {
-		t.Error("Sender address should be set")
+	walletA := wallet.NewWallet()
+	walletB := wallet.NewWallet()
+	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
+	tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, chain)
+
+	if tx == nil {
+		t.Error("Transaction should not be nil")
 	}
-	if tx.recipientAddr != "recipient" {
-		t.Error("Recipient address should be set")
+	if tx.TxOutputs[0].Value != 0.1 {
+		t.Error("Transaction value should be 0.1")
 	}
-	if tx.value != 0.1 {
-		t.Error("Value should be set")
+	if tx.TxOutputs[0].PublicKey != walletB.BlockchainAddress() {
+		t.Error("Transaction recipient should be walletB")
+	}
+	if tx.TxInputs[0].Signature != walletA.BlockchainAddress() {
+		t.Error("Transaction sender should be walletA")
 	}
 }
 
 func TestTx_isCoinbase(t *testing.T) {
-	tx := NewTransaction("sender", "recipient", 0.1)
-	if tx.isCoinbase() {
-		t.Error("Coinbase should be false")
+	miner := wallet.NewWallet()
+	ctx := CoinbaseTx(miner.BlockchainAddress())
+
+	if !ctx.isCoinbase() {
+		t.Error("Transaction should be coinbase")
 	}
-	tx.senderAddr = MINING_SENDER
-	if !tx.isCoinbase() {
-		t.Error("Coinbase should be true")
-	}
+
 }
 
 func TestTx_GenerateSignature(t *testing.T) {
 	w := wallet.NewWallet()
-	tx := NewTransaction("sender", "recipient", 0.1)
+	chain := InitBlockchain(w.BlockchainAddress(), 3000)
+	tx := NewTransaction(w.BlockchainAddress(), "recipient", 0.1, chain)
 	signature := tx.GenerateSignature(w.PrivateKey())
 	if signature == nil {
 		t.Error("Signature should not be nil")
 	}
+
+	isValid := chain.VerifyTxSignature(w.PublicKey(), signature, tx)
+	if !isValid {
+		t.Error("Transaction signature should be valid")
+	}
+
 }
