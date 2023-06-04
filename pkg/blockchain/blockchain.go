@@ -9,10 +9,12 @@ import (
 )
 
 type Blockchain struct {
-	blocks  []*Block
-	txPool  []*Tx
-	address string
-	port    uint16
+	blocks   []*Block
+	txPool   []*Tx
+	address  string
+	port     uint16
+	name     string
+	currency string
 }
 
 func (chain *Blockchain) AddBlock() {
@@ -24,7 +26,7 @@ func (chain *Blockchain) AddBlock() {
 func (chain *Blockchain) AddTransaction(sender string, recipient string, value float32, s *utils.Signature, senderPublicKey *ecdsa.PublicKey) bool {
 	tx := NewTransaction(sender, recipient, value)
 
-	if sender == MINING_SENDER {
+	if tx.isCoinbase() {
 		chain.txPool = append(chain.txPool, tx)
 		return true
 	}
@@ -76,17 +78,23 @@ func (chain *Blockchain) Mining() bool {
 
 func InitBlockchain(addr string, port uint16) *Blockchain {
 	return &Blockchain{
-		blocks:  []*Block{CreateGenesisBlock()},
-		txPool:  []*Tx{},
-		address: addr,
-		port:    port,
+		blocks:   []*Block{CreateGenesisBlock()},
+		txPool:   []*Tx{},
+		address:  addr,
+		port:     port,
+		name:     BLOCKCHAIN_NAME,
+		currency: BLOCKCHAIN_CURRENCY,
 	}
 }
 
 func (chain *Blockchain) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Blocks []*Block `json:"blocks"`
+		Blocks   []*Block `json:"blocks"`
+		Name     string   `json:"name"`
+		Currency string   `json:"currency"`
 	}{
-		Blocks: chain.blocks,
+		Blocks:   chain.blocks,
+		Name:     chain.name,
+		Currency: chain.currency,
 	})
 }
