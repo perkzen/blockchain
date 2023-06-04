@@ -35,8 +35,8 @@ func TestBlockchain_AddTransaction(t *testing.T) {
 	walletB := wallet.NewWallet()
 	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
 	chain.Mining()
-	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1)
-	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(), walletA.PublicKey())
+	tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1)
+	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
 
 	if !isAdd {
 		t.Error("Tx should be added to tx pool")
@@ -52,8 +52,8 @@ func TestBlockchain_ClearPool(t *testing.T) {
 	walletB := wallet.NewWallet()
 	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
 	chain.Mining()
-	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1)
-	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(), walletA.PublicKey())
+	tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1)
+	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
 
 	if !isAdd {
 		t.Error("Tx should be added to tx pool")
@@ -101,15 +101,15 @@ func TestBlockchain_CalculateTotalAmount(t *testing.T) {
 
 	chain.Mining()
 
-	tx1 := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
-	isAdded := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx1.GenerateSignature(), walletA.PublicKey())
+	tx1 := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
+	isAdded := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx1.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
 
 	if isAdded {
 		t.Error("Invalid transaction")
 	}
 
-	tx2 := wallet.NewTransaction(walletB.PrivateKey(), walletB.PublicKey(), walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0)
-	isAdded = chain.AddTransaction(walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0, tx2.GenerateSignature(), walletB.PublicKey())
+	tx2 := NewTransaction(walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0)
+	isAdded = chain.AddTransaction(walletB.BlockchainAddress(), walletA.BlockchainAddress(), 1.0, tx2.GenerateSignature(walletB.PrivateKey()), walletB.PublicKey())
 
 	if isAdded {
 		t.Error("Invalid transaction")

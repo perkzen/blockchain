@@ -1,6 +1,12 @@
 package blockchain
 
-import "encoding/json"
+import (
+	"blockchain/pkg/utils"
+	"crypto/ecdsa"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/json"
+)
 
 type Tx struct {
 	senderAddr    string
@@ -18,6 +24,13 @@ func NewTransaction(sender string, recipient string, value float32) *Tx {
 
 func (tx *Tx) isCoinbase() bool {
 	return tx.senderAddr == MINING_SENDER
+}
+
+func (tx *Tx) GenerateSignature(privateKey *ecdsa.PrivateKey) *utils.Signature {
+	t, _ := tx.MarshalJSON()
+	h := sha256.Sum256(t)
+	r, s, _ := ecdsa.Sign(rand.Reader, privateKey, h[:])
+	return &utils.Signature{R: r, S: s}
 }
 
 func (tx *Tx) MarshalJSON() ([]byte, error) {
