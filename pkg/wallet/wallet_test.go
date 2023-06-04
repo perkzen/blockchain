@@ -34,7 +34,7 @@ func TestWallet_PrivateKeyStr(t *testing.T) {
 
 func TestWallet_PublicKeyStr(t *testing.T) {
 	w := NewWallet()
-	if len(w.PublicKeyStr()) != 34 {
-		t.Error("Public key string should be 66 characters long")
+	if len(w.PublicKeyStr()) != 128 {
+		t.Error("Public key string should be 128 characters long")
 	}
 }
