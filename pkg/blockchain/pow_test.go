@@ -13,10 +13,10 @@ func TestPoW_ValidateReturnsTrue(t *testing.T) {
 		Nonce:        0,
 	})
 
-	nonce := pow.Proof()
+	nonce := pow.Validate()
 
-	if !pow.Validate(nonce) {
-		t.Error("Validate should equal to true")
+	if !pow.IsValid(nonce) {
+		t.Error("IsValid should equal to true")
 	}
 }
 
@@ -28,7 +28,7 @@ func TestPoW_ValidateReturnsFalse(t *testing.T) {
 		Nonce:        0,
 	})
 
-	if pow.Validate(0) {
-		t.Error("Validate should equal to false")
+	if pow.IsValid(0) {
+		t.Error("IsValid should equal to false")
 	}
 }

@@ -31,11 +31,12 @@ func TestBlockchain_AddBlock(t *testing.T) {
 }
 
 func TestBlockchain_AddTransaction(t *testing.T) {
-	chain := InitBlockchain("", 3000)
 	walletA := wallet.NewWallet()
 	walletB := wallet.NewWallet()
-	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
-	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx.GenerateSignature(), walletA.PublicKey())
+	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
+	chain.Mining()
+	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1)
+	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(), walletA.PublicKey())
 
 	if !isAdd {
 		t.Error("Tx should be added to tx pool")
@@ -47,11 +48,12 @@ func TestBlockchain_AddTransaction(t *testing.T) {
 }
 
 func TestBlockchain_ClearPool(t *testing.T) {
-	chain := InitBlockchain("", 3000)
 	walletA := wallet.NewWallet()
 	walletB := wallet.NewWallet()
-	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0)
-	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 1.0, tx.GenerateSignature(), walletA.PublicKey())
+	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
+	chain.Mining()
+	tx := wallet.NewTransaction(walletA.PrivateKey(), walletA.PublicKey(), walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1)
+	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(), walletA.PublicKey())
 
 	if !isAdd {
 		t.Error("Tx should be added to tx pool")

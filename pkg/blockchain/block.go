@@ -24,7 +24,7 @@ func NewBlock(prevHash [32]byte, transactions []*Tx) *Block {
 	}
 
 	pow := NewProofOfWork(b)
-	nonce := pow.Proof()
+	nonce := pow.Validate()
 
 	b.Nonce = nonce
 	b.Timestamp = time.Now().UnixNano()
