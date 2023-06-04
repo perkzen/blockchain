@@ -26,6 +26,13 @@ func NewTransaction(privateKey *ecdsa.PrivateKey, publicKey *ecdsa.PublicKey, se
 	}
 }
 
+func (tx *Tx) GenerateSignature() *utils.Signature {
+	t, _ := tx.MarshalJSON()
+	h := sha256.Sum256(t)
+	r, s, _ := ecdsa.Sign(rand.Reader, tx.senderPrivateKey, h[:])
+	return &utils.Signature{R: r, S: s}
+}
+
 func (tx *Tx) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Sender    string  `json:"sender_address"`
@@ -36,11 +43,4 @@ func (tx *Tx) MarshalJSON() ([]byte, error) {
 		Recipient: tx.recipientAddr,
 		Value:     tx.value,
 	})
-}
-
-func (tx *Tx) GenerateSignature() *utils.Signature {
-	t, _ := tx.MarshalJSON()
-	h := sha256.Sum256(t)
-	r, s, _ := ecdsa.Sign(rand.Reader, tx.senderPrivateKey, h[:])
-	return &utils.Signature{R: r, S: s}
 }
