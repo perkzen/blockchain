@@ -1,11 +1,14 @@
 package blockchain
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestBlock_Hash(t *testing.T) {
 	b := &Block{
 		Transactions: []*Tx{},
-		PrevHash:     [32]byte{},
+		PrevHash:     fmt.Sprintf("%x", [32]byte{}),
 		Timestamp:    0,
 		Nonce:        0,
 	}
@@ -15,7 +18,7 @@ func TestBlock_Hash(t *testing.T) {
 			CoinbaseTx("a"),
 			CoinbaseTx("b"),
 		},
-		PrevHash:  [32]byte{},
+		PrevHash:  fmt.Sprintf("%x", [32]byte{}),
 		Timestamp: 0,
 		Nonce:     0,
 	}
@@ -25,7 +28,7 @@ func TestBlock_Hash(t *testing.T) {
 			CoinbaseTx("a"),
 			CoinbaseTx("b"),
 		},
-		PrevHash:  [32]byte{},
+		PrevHash:  fmt.Sprintf("%x", [32]byte{}),
 		Timestamp: 0,
 		Nonce:     0,
 	}
@@ -35,7 +38,7 @@ func TestBlock_Hash(t *testing.T) {
 			CoinbaseTx("b"),
 			CoinbaseTx("a"),
 		},
-		PrevHash:  [32]byte{},
+		PrevHash:  fmt.Sprintf("%x", [32]byte{}),
 		Timestamp: 0,
 		Nonce:     0,
 	}

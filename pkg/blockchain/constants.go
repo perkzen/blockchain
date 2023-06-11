@@ -2,10 +2,10 @@ package blockchain
 
 const (
 	// BLOCKCHAIN_NAME
-	// is the name of the blockchain
+	// is the Name of the blockchain
 	BLOCKCHAIN_NAME = "BLOCKCHAIN"
 	// BLOCKCHAIN_CURRENCY
-	// is name of the native blockchain currency
+	// is Name of the native blockchain Currency
 	BLOCKCHAIN_CURRENCY = "BC"
 	// MINING_DIFFICULTY
 	// determines the number of zeros on the beginning of the hash

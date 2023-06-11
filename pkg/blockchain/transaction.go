@@ -13,23 +13,23 @@ import (
 
 // TxInput are references to previous outputs.
 type TxInput struct {
-	ID        []byte
-	OutIdx    int
-	Signature string
+	ID        string `json:"id"`
+	OutIdx    int    `json:"out_idx"`
+	Signature string `json:"signature"`
 }
 
 // TxOutput represents a transaction output.
 // Value is the amount of coins locked.
 // PublicKey value needed to unlock the coins.
 type TxOutput struct {
-	Value     float32
-	PublicKey string
+	Value     float32 `json:"value"`
+	PublicKey string  `json:"public_key"`
 }
 
 type Tx struct {
-	ID        [32]byte
-	TxInputs  []TxInput
-	TxOutputs []TxOutput
+	ID        string     `json:"id"`
+	TxInputs  []TxInput  `json:"tx_inputs"`
+	TxOutputs []TxOutput `json:"tx_outputs"`
 }
 
 func NewTransaction(sender string, recipient string, value float32, chain *Blockchain) *Tx {
@@ -48,7 +48,7 @@ func NewTransaction(sender string, recipient string, value float32, chain *Block
 			log.Panic(err)
 		}
 		for _, out := range outs {
-			input := TxInput{ID: txID, OutIdx: out, Signature: sender}
+			input := TxInput{ID: fmt.Sprintf("%x", txID), OutIdx: out, Signature: sender}
 			inputs = append(inputs, input)
 		}
 	}
@@ -77,9 +77,9 @@ func (out *TxOutput) CanBeUnlocked(addr string) bool {
 }
 
 func CoinbaseTx(receiverAddr string) *Tx {
-	txIn := TxInput{ID: []byte{}, OutIdx: -1, Signature: receiverAddr}
+	txIn := TxInput{ID: fmt.Sprintf("%x", []byte{}), OutIdx: -1, Signature: receiverAddr}
 	txOut := TxOutput{Value: COINBASE_REWARD, PublicKey: receiverAddr}
-	cbTx := &Tx{ID: [32]byte{}, TxInputs: []TxInput{txIn}, TxOutputs: []TxOutput{txOut}}
+	cbTx := &Tx{ID: fmt.Sprintf("%x", [32]byte{}), TxInputs: []TxInput{txIn}, TxOutputs: []TxOutput{txOut}}
 	cbTx.setID()
 	return cbTx
 }
@@ -93,7 +93,7 @@ func (tx *Tx) GenerateSignature(privateKey *ecdsa.PrivateKey) *utils.Signature {
 
 func (tx *Tx) setID() {
 	t, _ := tx.MarshalJSON()
-	tx.ID = sha256.Sum256(t[:])
+	tx.ID = fmt.Sprintf("%x", sha256.Sum256(t[:]))
 }
 
 func (tx *Tx) MarshalJSON() ([]byte, error) {

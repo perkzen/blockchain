@@ -22,7 +22,7 @@ func assertPanic(t *testing.T, f func()) {
 func TestCreateGenesisBlock(t *testing.T) {
 
 	chain := InitBlockchain("", 3000)
-	genesis := CreateGenesisBlock(chain.address)
+	genesis := CreateGenesisBlock(chain.Address)
 	genesisHash := fmt.Sprintf("%x", genesis.PrevHash)
 	hash := fmt.Sprintf("%x", [32]byte{})
 	if genesisHash != hash {
@@ -35,7 +35,7 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 func TestInitBlockchain(t *testing.T) {
 	chain := InitBlockchain("", 3000)
-	if len(chain.blocks) < 1 || len(chain.blocks) > 1 {
+	if len(chain.Blocks) < 1 || len(chain.Blocks) > 1 {
 		t.Error("Chain should have only 1 block on initiation")
 	}
 }
@@ -43,7 +43,7 @@ func TestInitBlockchain(t *testing.T) {
 func TestBlockchain_AddBlock(t *testing.T) {
 	chain := InitBlockchain("", 3000)
 	chain.AddBlock()
-	if len(chain.blocks) <= 1 {
+	if len(chain.Blocks) <= 1 {
 		t.Error("Chain should have more than 1 block")
 	}
 }
@@ -162,10 +162,10 @@ func TestBlockchain_ClearPool(t *testing.T) {
 	}
 
 	chain.AddBlock()
-	if len(chain.blocks) <= 1 {
+	if len(chain.Blocks) <= 1 {
 		t.Error("Chain should have more than 1 block")
 	}
-	if len(chain.txPool) >= 1 {
+	if len(chain.TxPool) >= 1 {
 		t.Error("Transaction pool should be empty")
 	}
 }
@@ -176,10 +176,10 @@ func TestBlockchain_Mining(t *testing.T) {
 	chain.MineBlock()
 	lastBlock := chain.lastBlock()
 
-	if len(chain.blocks) <= 1 {
+	if len(chain.Blocks) <= 1 {
 		t.Error("Chain should have more than 1 block")
 	}
-	if len(chain.txPool) >= 1 {
+	if len(chain.TxPool) >= 1 {
 		t.Error("Transaction pool should be empty")
 	}
 	if len(lastBlock.Transactions) != 1 {
@@ -194,7 +194,7 @@ func TestBlockchain_Mining(t *testing.T) {
 	chain.AddTransaction(miner.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(miner.PrivateKey()), miner.PublicKey())
 	chain.MineBlock()
 
-	if len(chain.blocks) <= 2 {
+	if len(chain.Blocks) <= 2 {
 		t.Error("Chain should have more than 2 block")
 	}
 	lastBlock = chain.lastBlock()

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 )
 
 type CommandLine struct {
@@ -40,9 +41,9 @@ func (cli *CommandLine) StartServer(port uint16) {
 	app.Run()
 }
 
-func (cli *CommandLine) send(to string, amount float64, blockchainUrl string) {
+func (cli *CommandLine) send(to string, amount float64, node uint16) {
 	body := []byte(fmt.Sprintf(`{"recipient": "%s", "amount": %f}`, to, amount))
-	res, err := http.Post(blockchainUrl+"/transaction", "application/json", bytes.NewBuffer(body))
+	res, err := http.Post("http://localhost:"+strconv.Itoa(int(node))+"/transaction", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		log.Panic(err)
 	}
@@ -64,10 +65,9 @@ func (cli *CommandLine) Run() {
 	port := startNodeCmd.Uint("port", 3000, "TCP Port Number for Blockchain server")
 
 	sendCmd := flag.NewFlagSet(SEND, flag.ExitOnError)
+	node := sendCmd.Uint("node", 3000, "TCP Port Number for Blockchain server")
 	to := sendCmd.String("to", "", "Recipient of the transaction")
 	amount := sendCmd.Float64("amount", 0, "Amount to send")
-
-	blockchainUrl := fmt.Sprintf("http://localhost:%d", *port)
 
 	switch os.Args[1] {
 	case START_NODE:
@@ -91,6 +91,6 @@ func (cli *CommandLine) Run() {
 	}
 
 	if sendCmd.Parsed() {
-		cli.send(*to, *amount, blockchainUrl)
+		cli.send(*to, *amount, uint16(*node))
 	}
 }

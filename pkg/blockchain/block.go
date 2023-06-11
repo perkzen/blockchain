@@ -9,16 +9,16 @@ import (
 )
 
 type Block struct {
-	PrevHash     [32]byte
-	Transactions []*Tx
-	Timestamp    int64
-	Nonce        int
+	PrevHash     string `json:"prev_hash"`
+	Transactions []*Tx  `json:"transactions"`
+	Timestamp    int64  `json:"timestamp"`
+	Nonce        int    `json:"nonce"`
 }
 
 func NewBlock(prevHash [32]byte, transactions []*Tx) *Block {
 	b := &Block{
 		Transactions: transactions,
-		PrevHash:     prevHash,
+		PrevHash:     fmt.Sprintf("%x", prevHash),
 		Timestamp:    0,
 		Nonce:        0,
 	}

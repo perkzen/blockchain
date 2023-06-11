@@ -10,31 +10,31 @@ import (
 )
 
 // Blockchain
-// address: address of the node (miner)
+// Address: Address of the node (miner)
 type Blockchain struct {
-	blocks   []*Block
-	txPool   []*Tx
-	address  string
-	port     uint16
-	name     string
-	currency string
+	Blocks   []*Block `json:"blocks"`
+	TxPool   []*Tx    `json:"tx_pool"`
+	Address  string   `json:"address"`
+	Port     uint16   `json:"port"`
+	Name     string   `json:"name"`
+	Currency string   `json:"currency"`
 }
 
 func (chain *Blockchain) AddBlock() {
 	prevHash := chain.lastBlock().Hash()
-	txPool := append([]*Tx{CoinbaseTx(chain.address)}, chain.txPool...)
-	chain.blocks = append(chain.blocks, NewBlock(prevHash, txPool))
-	chain.txPool = []*Tx{}
+	txPool := append([]*Tx{CoinbaseTx(chain.Address)}, chain.TxPool...)
+	chain.Blocks = append(chain.Blocks, NewBlock(prevHash, txPool))
+	chain.TxPool = []*Tx{}
 }
 
 func (chain *Blockchain) AddTransaction(sender string, recipient string, value float32, s *utils.Signature, senderPublicKey *ecdsa.PublicKey) bool {
 	tx := NewTransaction(sender, recipient, value, chain)
 	if tx.isCoinbase() {
-		chain.txPool = append(chain.txPool, tx)
+		chain.TxPool = append(chain.TxPool, tx)
 		return true
 	}
 	if chain.VerifyTxSignature(senderPublicKey, s, tx) {
-		chain.txPool = append(chain.txPool, tx)
+		chain.TxPool = append(chain.TxPool, tx)
 		return true
 	} else {
 		log.Panicln("ERROR: Failed to verify tx")
@@ -49,7 +49,7 @@ func (chain *Blockchain) VerifyTxSignature(senderPublicKey *ecdsa.PublicKey, s *
 }
 
 func (chain *Blockchain) lastBlock() *Block {
-	return chain.blocks[len(chain.blocks)-1]
+	return chain.Blocks[len(chain.Blocks)-1]
 }
 
 func CreateGenesisBlock(addr string) *Block {
@@ -64,7 +64,7 @@ func (chain *Blockchain) FindUnspentTxs(address string) []Tx {
 	var utxo []Tx
 	spentTXOs := make(map[string][]int)
 
-	for _, block := range chain.blocks {
+	for _, block := range chain.Blocks {
 		for _, tx := range block.Transactions {
 			txID := fmt.Sprintf("%x", tx.ID)
 		Outputs:
@@ -134,27 +134,29 @@ Work:
 
 func InitBlockchain(addr string, port uint16) *Blockchain {
 	return &Blockchain{
-		blocks:   []*Block{CreateGenesisBlock(addr)},
-		txPool:   []*Tx{},
-		address:  addr,
-		port:     port,
-		name:     BLOCKCHAIN_NAME,
-		currency: BLOCKCHAIN_CURRENCY,
+		Blocks:   []*Block{CreateGenesisBlock(addr)},
+		TxPool:   []*Tx{},
+		Address:  addr,
+		Port:     port,
+		Name:     BLOCKCHAIN_NAME,
+		Currency: BLOCKCHAIN_CURRENCY,
 	}
 }
 
-func (chain *Blockchain) Address() string {
-	return chain.address
+func (chain *Blockchain) Length() int {
+	return len(chain.Blocks)
 }
 
 func (chain *Blockchain) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Blocks   []*Block `json:"blocks"`
+		TxPool   []*Tx    `json:"tx_pool"`
 		Name     string   `json:"name"`
 		Currency string   `json:"currency"`
 	}{
-		Blocks:   chain.blocks,
-		Name:     chain.name,
-		Currency: chain.currency,
+		Blocks:   chain.Blocks,
+		TxPool:   chain.TxPool,
+		Name:     chain.Name,
+		Currency: chain.Currency,
 	})
 }
