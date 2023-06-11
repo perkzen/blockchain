@@ -77,7 +77,7 @@ func (out *TxOutput) CanBeUnlocked(addr string) bool {
 }
 
 func CoinbaseTx(receiverAddr string) *Tx {
-	txIn := TxInput{ID: fmt.Sprintf("%x", []byte{}), OutIdx: -1, Signature: receiverAddr}
+	txIn := TxInput{ID: "COINBASE", OutIdx: -1, Signature: receiverAddr}
 	txOut := TxOutput{Value: COINBASE_REWARD, PublicKey: receiverAddr}
 	cbTx := &Tx{ID: fmt.Sprintf("%x", [32]byte{}), TxInputs: []TxInput{txIn}, TxOutputs: []TxOutput{txOut}}
 	cbTx.setID()
