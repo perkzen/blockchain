@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -8,7 +9,7 @@ import (
 func TestPoW_ValidateReturnsTrue(t *testing.T) {
 	pow := NewProofOfWork(&Block{
 		Transactions: []*Tx{},
-		PrevHash:     [32]byte{},
+		PrevHash:     fmt.Sprintf("%x", [32]byte{}),
 		Timestamp:    time.Now().UnixNano(),
 		Nonce:        0,
 	})
@@ -23,7 +24,7 @@ func TestPoW_ValidateReturnsTrue(t *testing.T) {
 func TestPoW_ValidateReturnsFalse(t *testing.T) {
 	pow := NewProofOfWork(&Block{
 		Transactions: []*Tx{},
-		PrevHash:     [32]byte{},
+		PrevHash:     fmt.Sprintf("%x", [32]byte{}),
 		Timestamp:    time.Now().UnixNano(),
 		Nonce:        0,
 	})

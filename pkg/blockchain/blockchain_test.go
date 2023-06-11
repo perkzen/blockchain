@@ -23,9 +23,8 @@ func TestCreateGenesisBlock(t *testing.T) {
 
 	chain := InitBlockchain("", 3000)
 	genesis := CreateGenesisBlock(chain.Address)
-	genesisHash := fmt.Sprintf("%x", genesis.PrevHash)
 	hash := fmt.Sprintf("%x", [32]byte{})
-	if genesisHash != hash {
+	if genesis.PrevHash != hash {
 		t.Error("Hashes do not equal")
 	}
 	if !isCoinbase(genesis.Transactions[0]) || len(genesis.Transactions) != 1 {
