@@ -85,7 +85,7 @@ func (s *Server) GetBlockchain() *blockchain.Blockchain {
 }
 
 func (s *Server) SyncChains() {
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(CHAIN_SYNC_TIMEOUT)
 	quit := make(chan struct{})
 
 	go func() {
@@ -103,7 +103,7 @@ func (s *Server) SyncChains() {
 }
 
 func (s *Server) MineBlock() {
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(MINING_TIMEOUT)
 	quit := make(chan struct{})
 
 	chain := s.GetBlockchain()

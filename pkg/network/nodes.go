@@ -94,7 +94,7 @@ func getNodes() {
 }
 
 func (s *Server) SearchNodes() {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(NODES_SYNC_TIMEOUT)
 	quit := make(chan struct{})
 
 	go func() {
