@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"blockchain/pkg/wallet"
-	"fmt"
 	"testing"
 )
 
@@ -22,7 +21,7 @@ func assertPanic(t *testing.T, f func()) {
 func TestCreateGenesisBlock(t *testing.T) {
 	chain := InitBlockchain("", 3000)
 	genesis := CreateGenesisBlock(chain.Address)
-	hash := fmt.Sprintf("%x", []byte{})
+	hash := "GENESIS"
 	if genesis.PrevHash != hash {
 		t.Error("Hashes do not equal")
 	}
