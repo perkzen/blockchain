@@ -40,9 +40,9 @@ func (cli *CommandLine) StartServer(port uint16) {
 	app.Run()
 }
 
-func (cli *CommandLine) send(to string, amount float64) {
+func (cli *CommandLine) send(to string, amount float64, blockchainUrl string) {
 	body := []byte(fmt.Sprintf(`{"recipient": "%s", "amount": %f}`, to, amount))
-	res, err := http.Post("http://localhost:3000/transaction", "application/json", bytes.NewBuffer(body))
+	res, err := http.Post(blockchainUrl+"/transaction", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		log.Panic(err)
 	}
@@ -67,6 +67,8 @@ func (cli *CommandLine) Run() {
 	to := sendCmd.String("to", "", "Recipient of the transaction")
 	amount := sendCmd.Float64("amount", 0, "Amount to send")
 
+	blockchainUrl := fmt.Sprintf("http://localhost:%d", *port)
+
 	switch os.Args[1] {
 	case START_NODE:
 		err := startNodeCmd.Parse(os.Args[2:])
@@ -89,6 +91,6 @@ func (cli *CommandLine) Run() {
 	}
 
 	if sendCmd.Parsed() {
-		cli.send(*to, *amount)
+		cli.send(*to, *amount, blockchainUrl)
 	}
 }
