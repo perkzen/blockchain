@@ -73,7 +73,33 @@ func TestBlockchain_FindUTXO(t *testing.T) {
 	}
 }
 
-func TestBlockchain_FindSpendableOutputs(t *testing.T) {
+func TestBlockchain_FindSpendableOutputs1(t *testing.T) {
+	walletA := wallet.NewWallet()
+	walletB := wallet.NewWallet()
+	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
+
+	// WalletA has 0.1 coins
+	// WalletA -> 0.1 coins -> WalletB
+	// WalletA mines block gets 0.1 coins
+	// WalletA has 0.1 coins
+	// WalletB has 0.1 coins
+
+	tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, chain)
+	chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
+	chain.MineBlock()
+
+	//amount5, _ := chain.FindSpendableOutputs(walletA.BlockchainAddress(), 0.3)
+	amount6, _ := chain.FindSpendableOutputs(walletB.BlockchainAddress(), 0.3)
+	if amount6 != 0.1 {
+		t.Error("Amount in B should be 0.1 but is", amount6)
+	}
+	//if amount5 != 0.1 {
+	//	t.Error("Amount in A should be 0.1 but is", amount5)
+	//}
+
+}
+
+func TestBlockchain_FindSpendableOutputs2(t *testing.T) {
 	walletA := wallet.NewWallet()
 	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
 	chain.MineBlock()
@@ -81,11 +107,16 @@ func TestBlockchain_FindSpendableOutputs(t *testing.T) {
 	if amount1 != 0.1 {
 		t.Error("Amount should be 0.1")
 	}
-
 	amount2, _ := chain.FindSpendableOutputs(walletA.BlockchainAddress(), 0.2)
 	if amount2 != 0.2 {
 		t.Error("Amount should be 0.2")
 	}
+}
+
+func TestBlockchain_FindSpendableOutputs3(t *testing.T) {
+	walletA := wallet.NewWallet()
+	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
+	chain.MineBlock()
 
 	amount3, _ := chain.FindSpendableOutputs(walletA.BlockchainAddress(), 0.3)
 	if amount3 == 0.3 {
@@ -97,14 +128,6 @@ func TestBlockchain_FindSpendableOutputs(t *testing.T) {
 	if amount4 != 0 {
 		t.Error("Amount should be 0")
 	}
-
-	//tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.2, chain)
-	//chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.2, tx.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
-	//chain.MineBlock()
-	//// TODO
-	//amount5, _ := chain.FindSpendableOutputs(walletA.BlockchainAddress(), 2)
-	//fmt.Println(amount5)
-
 }
 
 func TestBlockchain_AddTransaction(t *testing.T) {

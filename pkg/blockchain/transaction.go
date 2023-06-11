@@ -39,7 +39,7 @@ func NewTransaction(sender string, recipient string, value float32, chain *Block
 	acc, validOutputs := chain.FindSpendableOutputs(sender, value)
 
 	if acc < value {
-		log.Panic("ERROR: Insufficient funds")
+		log.Panic("ERROR: Insufficient funds.")
 	}
 
 	for txid, outs := range validOutputs {

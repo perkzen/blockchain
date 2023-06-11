@@ -37,7 +37,7 @@ func (chain *Blockchain) AddTransaction(sender string, recipient string, value f
 		chain.txPool = append(chain.txPool, tx)
 		return true
 	} else {
-		log.Panicln("ERROR: Failed to very tx")
+		log.Panicln("ERROR: Failed to verify tx")
 	}
 	return false
 }
@@ -141,6 +141,10 @@ func InitBlockchain(addr string, port uint16) *Blockchain {
 		name:     BLOCKCHAIN_NAME,
 		currency: BLOCKCHAIN_CURRENCY,
 	}
+}
+
+func (chain *Blockchain) Address() string {
+	return chain.address
 }
 
 func (chain *Blockchain) MarshalJSON() ([]byte, error) {

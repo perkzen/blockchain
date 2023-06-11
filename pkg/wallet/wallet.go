@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"golang.org/x/crypto/ripemd160"
@@ -89,3 +90,70 @@ func (w *Wallet) PublicKeyStr() string {
 func (w *Wallet) BlockchainAddress() string {
 	return w.address
 }
+
+func (w *Wallet) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		PrivateKey *ecdsa.PrivateKey `json:"private_key"`
+		PublicKey  *ecdsa.PublicKey  `json:"public_key"`
+		Address    string            `json:"blockchain_address"`
+	}{
+		PrivateKey: w.privateKey,
+		PublicKey:  w.publicKey,
+		Address:    w.BlockchainAddress(),
+	})
+}
+
+// Doesn't work in GO 1.20 or more
+//func (w *Wallet) Save() {
+//	type WalletEncode struct {
+//		PrivateKey ecdsa.PrivateKey
+//		PublicKey  ecdsa.PublicKey
+//		Address    string
+//	}
+//
+//	var content bytes.Buffer
+//
+//	gob.Register(elliptic.P256())
+//	encoder := gob.NewEncoder(&content)
+//
+//	err := encoder.Encode(WalletEncode{
+//		PrivateKey: *w.privateKey,
+//		PublicKey:  *w.publicKey,
+//		Address:    w.BlockchainAddress(),
+//	})
+//
+//	if err != nil {
+//		log.Panic(err)
+//	}
+//	err = os.WriteFile("data/wallet.dat", content.Bytes(), 0644)
+//	if err != nil {
+//		log.Panic(err)
+//	}
+//
+//}
+//
+//func Load() *Wallet {
+//	var wallet struct {
+//		PrivateKey ecdsa.PrivateKey
+//		PublicKey  ecdsa.PublicKey
+//		Address    string
+//	}
+//
+//	content, err := os.ReadFile("data/wallet.dat")
+//	if err != nil {
+//		log.Panic(err)
+//	}
+//
+//	gob.Register(elliptic.P256())
+//	decoder := gob.NewDecoder(bytes.NewReader(content))
+//	err = decoder.Decode(&wallet)
+//	if err != nil {
+//		log.Panic(err)
+//	}
+//
+//	return &Wallet{
+//		privateKey: &wallet.PrivateKey,
+//		publicKey:  &wallet.PublicKey,
+//		address:    wallet.Address,
+//	}
+//}
