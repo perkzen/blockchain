@@ -3,7 +3,6 @@ package network
 import (
 	"blockchain/pkg/blockchain"
 	"blockchain/pkg/wallet"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -46,6 +45,9 @@ func (s *Server) Run() {
 	http.HandleFunc("/", s.chainHandler)
 	http.HandleFunc("/transaction", s.transactionHandler)
 	http.HandleFunc("/nodes", s.nodeHandler)
-	fmt.Printf("Blockchain node is listening on: http://localhost:%d\n", s.Port())
+	s.AddNode("localhost:" + strconv.Itoa(int(s.Port())))
+	s.SearchNodes()
+	s.SyncChains()
+	s.MineBlock()
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+strconv.Itoa(int(s.Port())), nil))
 }

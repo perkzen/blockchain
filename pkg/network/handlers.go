@@ -14,6 +14,7 @@ func (s *Server) transactionHandler(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("ERROR: Invalid Method")
 	}
 	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	type ReqBody struct {
 		Recipient string  `json:"recipient"`
@@ -32,10 +33,6 @@ func (s *Server) transactionHandler(w http.ResponseWriter, req *http.Request) {
 	tx := blockchain.NewTransaction(wallet.BlockchainAddress(), body.Recipient, 0.1, chain)
 	chain.AddTransaction(wallet.BlockchainAddress(), body.Recipient, 0.1, tx.GenerateSignature(wallet.PrivateKey()), wallet.PublicKey())
 
-	fmt.Println("⛏️  Mining block...")
-	chain.MineBlock()
-	fmt.Println("️✅  Block successfully mined")
-
 	_, err = io.WriteString(w, "Transaction received and will be added to the blockchain")
 	if err != nil {
 		log.Fatal("ERROR: Failed to send JSON")
@@ -48,6 +45,7 @@ func (s *Server) chainHandler(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("ERROR: Invalid Method")
 	}
 	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	chain := s.GetBlockchain()
 	m, _ := chain.MarshalJSON()
@@ -60,6 +58,7 @@ func (s *Server) chainHandler(w http.ResponseWriter, req *http.Request) {
 func (s *Server) nodeHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		w.Header().Add("Content-Type", "application/json")
+		w.Header().Add("Access-Control-Allow-Origin", "*")
 
 		nodes, _ := json.Marshal(knownNodes)
 
@@ -69,4 +68,28 @@ func (s *Server) nodeHandler(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	if req.Method == http.MethodPost {
+		w.Header().Add("Content-Type", "application/json")
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+
+		type ReqBody struct {
+			Node string `json:"node"`
+		}
+
+		var body ReqBody
+		err := json.NewDecoder(req.Body).Decode(&body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		s.AddNodeIfNotKnown(body.Node)
+
+		_, err = io.WriteString(w, "Node added successfully")
+		if err != nil {
+			log.Fatal("ERROR: Failed to send JSON")
+		}
+	}
 }
+
+// TODO add wallet handler
