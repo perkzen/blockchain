@@ -15,10 +15,10 @@ type Block struct {
 	Nonce        int    `json:"nonce"`
 }
 
-func NewBlock(prevHash [32]byte, transactions []*Tx) *Block {
+func NewBlock(prevHash string, transactions []*Tx) *Block {
 	b := &Block{
 		Transactions: transactions,
-		PrevHash:     fmt.Sprintf("%x", prevHash),
+		PrevHash:     prevHash,
 		Timestamp:    0,
 		Nonce:        0,
 	}
@@ -39,17 +39,17 @@ func (b *Block) MarshalJSON() ([]byte, error) {
 		Nonce        int    `json:"nonce"`
 		Timestamp    int64  `json:"timestamp"`
 	}{
-		PrevHash:     fmt.Sprintf("%x", b.PrevHash),
+		PrevHash:     b.PrevHash,
 		Transactions: b.Transactions,
 		Nonce:        b.Nonce,
 		Timestamp:    b.Timestamp,
 	})
 }
 
-func (b *Block) Hash() [32]byte {
+func (b *Block) Hash() string {
 	data, err := b.MarshalJSON()
 	if err != nil {
 		log.Panic(err)
 	}
-	return sha256.Sum256(data)
+	return fmt.Sprintf("%x", sha256.Sum256(data))
 }

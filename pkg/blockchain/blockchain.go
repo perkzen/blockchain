@@ -53,7 +53,7 @@ func (chain *Blockchain) lastBlock() *Block {
 }
 
 func CreateGenesisBlock(addr string) *Block {
-	return NewBlock([32]byte{}, []*Tx{CoinbaseTx(addr)})
+	return NewBlock(fmt.Sprintf("%x", []byte{}), []*Tx{CoinbaseTx(addr)})
 }
 
 func (chain *Blockchain) MineBlock() {

@@ -20,16 +20,25 @@ func assertPanic(t *testing.T, f func()) {
 }
 
 func TestCreateGenesisBlock(t *testing.T) {
-
 	chain := InitBlockchain("", 3000)
 	genesis := CreateGenesisBlock(chain.Address)
-	hash := fmt.Sprintf("%x", [32]byte{})
+	hash := fmt.Sprintf("%x", []byte{})
 	if genesis.PrevHash != hash {
 		t.Error("Hashes do not equal")
 	}
 	if !isCoinbase(genesis.Transactions[0]) || len(genesis.Transactions) != 1 {
 		t.Error("Genesis block should contain only 1 coinbase transaction")
 	}
+}
+
+func TestBlockchain_Hashes(t *testing.T) {
+	chain := InitBlockchain("", 3000)
+	chain.MineBlock()
+	hash := chain.Blocks[0].Hash()
+	if hash != chain.Blocks[1].PrevHash {
+		t.Error("Hashes should be equal")
+	}
+
 }
 
 func TestInitBlockchain(t *testing.T) {

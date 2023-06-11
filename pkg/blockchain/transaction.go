@@ -102,7 +102,7 @@ func (tx *Tx) MarshalJSON() ([]byte, error) {
 		TxInputs  []TxInput  `json:"tx_inputs"`
 		TxOutputs []TxOutput `json:"tx_outputs"`
 	}{
-		ID:        fmt.Sprintf("%x", tx.ID),
+		ID:        tx.ID,
 		TxInputs:  tx.TxInputs,
 		TxOutputs: tx.TxOutputs,
 	})

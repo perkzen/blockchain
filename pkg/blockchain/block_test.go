@@ -8,7 +8,7 @@ import (
 func TestBlock_Hash(t *testing.T) {
 	b := &Block{
 		Transactions: []*Tx{},
-		PrevHash:     fmt.Sprintf("%x", [32]byte{}),
+		PrevHash:     fmt.Sprintf("%x", []byte{}),
 		Timestamp:    0,
 		Nonce:        0,
 	}
@@ -18,7 +18,7 @@ func TestBlock_Hash(t *testing.T) {
 			CoinbaseTx("a"),
 			CoinbaseTx("b"),
 		},
-		PrevHash:  fmt.Sprintf("%x", [32]byte{}),
+		PrevHash:  fmt.Sprintf("%x", []byte{}),
 		Timestamp: 0,
 		Nonce:     0,
 	}
@@ -28,7 +28,7 @@ func TestBlock_Hash(t *testing.T) {
 			CoinbaseTx("a"),
 			CoinbaseTx("b"),
 		},
-		PrevHash:  fmt.Sprintf("%x", [32]byte{}),
+		PrevHash:  fmt.Sprintf("%x", []byte{}),
 		Timestamp: 0,
 		Nonce:     0,
 	}
@@ -38,14 +38,14 @@ func TestBlock_Hash(t *testing.T) {
 			CoinbaseTx("b"),
 			CoinbaseTx("a"),
 		},
-		PrevHash:  fmt.Sprintf("%x", [32]byte{}),
+		PrevHash:  fmt.Sprintf("%x", []byte{}),
 		Timestamp: 0,
 		Nonce:     0,
 	}
 
 	hash := b.Hash()
 
-	if hash == [32]byte{} {
+	if hash == fmt.Sprintf("%x", []byte{}) {
 		t.Error("Hash should not be empty")
 	}
 
