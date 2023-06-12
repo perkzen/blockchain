@@ -15,3 +15,4 @@
 - [ ] Miner fees
 - [ ] Max transaction in block
 - [ ] remove node on disconnect
+- [ ] save wallet to file

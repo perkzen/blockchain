@@ -92,4 +92,34 @@ func (s *Server) nodeHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// TODO add wallet handler
+func (s *Server) walletHandler(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		fmt.Println("ERROR: Invalid Method")
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	wallet := s.GetWallet()
+	chain := s.GetBlockchain()
+	var balance float32 = 0.0
+	utxo := chain.FindUTXO(wallet.BlockchainAddress())
+	for _, out := range utxo {
+		balance += out.Value
+	}
+
+	type RespBody struct {
+		Address string  `json:"address"`
+		Balance float32 `json:"balance"`
+	}
+
+	respBody := &RespBody{
+		Address: wallet.BlockchainAddress(),
+		Balance: balance,
+	}
+
+	m, _ := json.Marshal(respBody)
+	_, err := io.WriteString(w, string(m[:]))
+	if err != nil {
+		log.Fatal("ERROR: Failed to send JSON")
+	}
+}

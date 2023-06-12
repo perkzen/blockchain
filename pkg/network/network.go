@@ -45,6 +45,7 @@ func (s *Server) Run() {
 	http.HandleFunc("/", s.chainHandler)
 	http.HandleFunc("/transaction", s.transactionHandler)
 	http.HandleFunc("/nodes", s.nodeHandler)
+	http.HandleFunc("/wallet", s.walletHandler)
 	s.AddNode("localhost:" + strconv.Itoa(int(s.Port())))
 	s.SearchNodes()
 	s.SyncChains()

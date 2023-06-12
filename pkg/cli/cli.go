@@ -18,14 +18,15 @@ type CommandLine struct {
 
 const (
 	START_NODE = "start-node"
-	SEND       = "send"
+	SEND       = "Send"
+	BALANCE    = "balance"
 )
 
 func (cli *CommandLine) listCommands() {
 	fmt.Println("Usage: ")
-	fmt.Printf("%s -port --> start blockchain server\n", START_NODE)
-	fmt.Printf("%s -to -amount --> send amount from address to address\n", SEND)
-
+	fmt.Printf("%s -port --> Start blockchain server\n", START_NODE)
+	fmt.Printf("%s -to -amount --> Send amount from address to address\n", SEND)
+	fmt.Printf("%s -a --> Get balance of address\n", BALANCE)
 }
 
 func (cli *CommandLine) validateArgs() {
@@ -41,7 +42,7 @@ func (cli *CommandLine) StartServer(port uint16) {
 	app.Run()
 }
 
-func (cli *CommandLine) send(to string, amount float64, node uint16) {
+func (cli *CommandLine) Send(to string, amount float64, node uint16) {
 	body := []byte(fmt.Sprintf(`{"recipient": "%s", "amount": %f}`, to, amount))
 	res, err := http.Post("http://localhost:"+strconv.Itoa(int(node))+"/transaction", "application/json", bytes.NewBuffer(body))
 	if err != nil {
@@ -50,6 +51,22 @@ func (cli *CommandLine) send(to string, amount float64, node uint16) {
 
 	if res.StatusCode != http.StatusOK {
 		log.Panic("ERROR: Failed to send transaction")
+	}
+	bodyBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println(string(bodyBytes))
+}
+
+func (cli *CommandLine) GetBalance(node uint16) {
+	res, err := http.Get("http://localhost:" + strconv.Itoa(int(node)) + "/wallet")
+	if err != nil {
+		log.Panic(err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		log.Panic("ERROR: Failed to get balance")
 	}
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
@@ -69,6 +86,9 @@ func (cli *CommandLine) Run() {
 	to := sendCmd.String("to", "", "Recipient of the transaction")
 	amount := sendCmd.Float64("amount", 0, "Amount to send")
 
+	balanceCmd := flag.NewFlagSet(BALANCE, flag.ExitOnError)
+	node = balanceCmd.Uint("node", 3000, "TCP Port Number for Blockchain server")
+
 	switch os.Args[1] {
 	case START_NODE:
 		err := startNodeCmd.Parse(os.Args[2:])
@@ -77,6 +97,11 @@ func (cli *CommandLine) Run() {
 		}
 	case SEND:
 		err := sendCmd.Parse(os.Args[2:])
+		if err != nil {
+			log.Panic(err)
+		}
+	case BALANCE:
+		err := balanceCmd.Parse(os.Args[2:])
 		if err != nil {
 			log.Panic(err)
 		}
@@ -91,6 +116,10 @@ func (cli *CommandLine) Run() {
 	}
 
 	if sendCmd.Parsed() {
-		cli.send(*to, *amount, uint16(*node))
+		cli.Send(*to, *amount, uint16(*node))
+	}
+
+	if balanceCmd.Parsed() {
+		cli.GetBalance(uint16(*node))
 	}
 }

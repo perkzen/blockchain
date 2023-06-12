@@ -20,11 +20,13 @@ type Blockchain struct {
 	Currency string   `json:"currency"`
 }
 
-func (chain *Blockchain) AddBlock() {
+func (chain *Blockchain) AddBlock() *Block {
 	prevHash := chain.lastBlock().Hash()
 	txPool := append([]*Tx{CoinbaseTx(chain.Address)}, chain.TxPool...)
-	chain.Blocks = append(chain.Blocks, NewBlock(prevHash, txPool))
+	newBlock := NewBlock(prevHash, txPool)
+	chain.Blocks = append(chain.Blocks, newBlock)
 	chain.TxPool = []*Tx{}
+	return newBlock
 }
 
 func (chain *Blockchain) AddTransaction(sender string, recipient string, value float32, s *utils.Signature, senderPublicKey *ecdsa.PublicKey) bool {
@@ -56,8 +58,8 @@ func CreateGenesisBlock(addr string) *Block {
 	return NewBlock("GENESIS", []*Tx{CoinbaseTx(addr)})
 }
 
-func (chain *Blockchain) MineBlock() {
-	chain.AddBlock()
+func (chain *Blockchain) MineBlock() *Block {
+	return chain.AddBlock()
 }
 
 func (chain *Blockchain) FindUnspentTxs(address string) []Tx {

@@ -33,12 +33,13 @@ func (s *Server) getLongestChain() *blockchain.Blockchain {
 		}
 		if res.StatusCode == http.StatusOK {
 
-			var c blockchain.Blockchain
+			var c *blockchain.Blockchain
 			err := json.NewDecoder(res.Body).Decode(&c)
 			if err != nil {
 				log.Fatal(err)
 			}
 			chains[node] = c.Length()
+			fmt.Printf("🔗 %s: %d\n", node, c.Length())
 		}
 	}
 
@@ -51,9 +52,15 @@ func (s *Server) getLongestChain() *blockchain.Blockchain {
 			longestChainNode = node
 		}
 	}
+	fmt.Printf("🔗 Longest chain: %s: %d\n", longestChainNode, longestChainLength)
+
+	if longestChainNode == fmt.Sprintf("localhost:%d", s.Port()) {
+		return chain
+	}
 
 	// if no other nodes are running, create a new blockchain
-	if longestChainNode == "" {
+	if longestChainLength == 0 {
+		fmt.Printf("🔗 No other nodes running, creating new blockchain\n")
 		minersWallet := wallet.NewWallet()
 		walletCache[WALLET] = minersWallet
 		longestBlockchain = blockchain.InitBlockchain(minersWallet.BlockchainAddress(), s.Port())
@@ -80,6 +87,7 @@ func (s *Server) GetBlockchain() *blockchain.Blockchain {
 	chain, ok := chainCache[BLOCKCHAIN]
 	if !ok {
 		chain = s.getLongestChain()
+		chainCache[BLOCKCHAIN] = chain
 	}
 	return chain
 }
