@@ -66,6 +66,20 @@ Work:
 	return acc, unspentOut
 }
 
+func (utxo *UTXO) GetBalance(address string) float32 {
+	var balance float32 = 0.0
+
+	for _, out := range utxo.outputs {
+		if out.TxOutput.CanBeUnlocked(address) {
+			if !utxo.isSpent[out.Hash()] {
+				balance += out.TxOutput.Value
+			}
+		}
+	}
+
+	return balance
+}
+
 func (out *Output) MarshallJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		TxOutput struct {

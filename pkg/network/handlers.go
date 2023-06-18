@@ -1,7 +1,6 @@
 package network
 
 import (
-	"blockchain/pkg/blockchain"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -30,8 +29,7 @@ func (s *Server) transactionHandler(w http.ResponseWriter, req *http.Request) {
 
 	chain := s.GetBlockchain()
 	wallet := s.GetWallet()
-	tx := blockchain.NewTransaction(wallet.BlockchainAddress(), body.Recipient, 0.1, chain)
-	chain.AddTransaction(wallet.BlockchainAddress(), body.Recipient, 0.1, tx.GenerateSignature(wallet.PrivateKey()), wallet.PublicKey())
+	chain.AddTransaction(wallet.BlockchainAddress(), body.Recipient, 0.1, wallet.PrivateKey(), wallet.PublicKey())
 
 	_, err = io.WriteString(w, "Transaction received and will be added to the blockchain")
 	if err != nil {
@@ -101,11 +99,7 @@ func (s *Server) walletHandler(w http.ResponseWriter, req *http.Request) {
 
 	wallet := s.GetWallet()
 	chain := s.GetBlockchain()
-	var balance float32 = 0.0
-	utxo := chain.FindUTXO(wallet.BlockchainAddress())
-	for _, out := range utxo {
-		balance += out.Value
-	}
+	balance := chain.UTXO.GetBalance(wallet.BlockchainAddress())
 
 	type RespBody struct {
 		Address string  `json:"address"`
