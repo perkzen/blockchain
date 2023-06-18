@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"blockchain/pkg/wallet"
+	"math"
 	"testing"
 )
 
@@ -20,7 +21,7 @@ func assertPanic(t *testing.T, f func()) {
 
 func TestCreateGenesisBlock(t *testing.T) {
 	chain := InitBlockchain("", 3000)
-	genesis := CreateGenesisBlock(chain.Address)
+	genesis := chain.CreateGenesisBlock()
 	hash := "GENESIS"
 	if genesis.PrevHash != hash {
 		t.Error("Hashes do not equal")
@@ -42,7 +43,7 @@ func TestBlockchain_Hashes(t *testing.T) {
 
 func TestInitBlockchain(t *testing.T) {
 	chain := InitBlockchain("", 3000)
-	if len(chain.Blocks) < 1 || len(chain.Blocks) > 1 {
+	if len(chain.Blocks) != 1 {
 		t.Error("Chain should have only 1 block on initiation")
 	}
 }
@@ -55,85 +56,24 @@ func TestBlockchain_AddBlock(t *testing.T) {
 	}
 }
 
-func TestBlockchain_FindUnspentTxs(t *testing.T) {
+func TestBlockchain_Balance(t *testing.T) {
 	walletA := wallet.NewWallet()
 	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
-	chain.MineBlock()
-	utxo := chain.FindUnspentTxs(walletA.BlockchainAddress())
-	if len(utxo) != 2 {
-		t.Error("Wallet A should have 2 unspent transactions (from genesis block and new block reward)")
-	}
-}
-
-func TestBlockchain_FindUTXO(t *testing.T) {
-	walletA := wallet.NewWallet()
-	walletB := wallet.NewWallet()
-	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
-	chain.MineBlock()
-	utxo := chain.FindUTXO(walletA.BlockchainAddress())
-	if len(utxo) != 2 {
-		t.Error("Wallet A should have 2 unspent transactions (from genesis block and new block reward)")
-	}
-	utxo = chain.FindUTXO(walletB.BlockchainAddress())
-	if len(utxo) != 0 {
-		t.Error("Wallet B should have 0 unspent transactions")
-	}
-}
-
-func TestBlockchain_FindSpendableOutputs1(t *testing.T) {
-	walletA := wallet.NewWallet()
-	walletB := wallet.NewWallet()
-	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
-
-	// WalletA has 0.1 coins
-	// WalletA -> 0.1 coins -> WalletB
-	// WalletA mines block gets 0.1 coins
-	// WalletA has 0.1 coins
-	// WalletB has 0.1 coins
-
-	tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, chain)
-	chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
-	chain.MineBlock()
-
-	//amount5, _ := chain.FindSpendableOutputs(walletA.BlockchainAddress(), 0.3)
-	amount6, _ := chain.FindSpendableOutputs(walletB.BlockchainAddress(), 0.3)
-	if amount6 != 0.1 {
-		t.Error("Amount in B should be 0.1 but is", amount6)
-	}
-	//if amount5 != 0.1 {
-	//	t.Error("Amount in A should be 0.1 but is", amount5)
-	//}
-
-}
-
-func TestBlockchain_FindSpendableOutputs2(t *testing.T) {
-	walletA := wallet.NewWallet()
-	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
-	chain.MineBlock()
-	amount1, _ := chain.FindSpendableOutputs(walletA.BlockchainAddress(), 0.1)
-	if amount1 != 0.1 {
-		t.Error("Amount should be 0.1")
-	}
-	amount2, _ := chain.FindSpendableOutputs(walletA.BlockchainAddress(), 0.2)
-	if amount2 != 0.2 {
-		t.Error("Amount should be 0.2")
-	}
-}
-
-func TestBlockchain_FindSpendableOutputs3(t *testing.T) {
-	walletA := wallet.NewWallet()
-	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
-	chain.MineBlock()
-
-	amount3, _ := chain.FindSpendableOutputs(walletA.BlockchainAddress(), 0.3)
-	if amount3 == 0.3 {
-		t.Error("Amount should not be 0.3 because there is only 0.2 unspent")
+	balanceA, _ := chain.UTXO.FindSpendableOutputs(walletA.BlockchainAddress(), math.MaxInt)
+	if balanceA != COINBASE_REWARD {
+		t.Error("Balance should be equal to COINBASE_REWARD but got", balanceA)
 	}
 
 	walletB := wallet.NewWallet()
-	amount4, _ := chain.FindSpendableOutputs(walletB.BlockchainAddress(), 0.1)
-	if amount4 != 0 {
-		t.Error("Amount should be 0")
+	balanceB, _ := chain.UTXO.FindSpendableOutputs(walletB.BlockchainAddress(), math.MaxInt)
+	if balanceB != 0 {
+		t.Error("Balance should be equal to 0 but got", balanceB)
+	}
+
+	chain.MineBlock()
+	balanceA, _ = chain.UTXO.FindSpendableOutputs(walletA.BlockchainAddress(), math.MaxInt)
+	if balanceA != COINBASE_REWARD*2 {
+		t.Error("Balance should be equal to COINBASE_REWARD*2 but got", balanceA)
 	}
 }
 
@@ -141,19 +81,50 @@ func TestBlockchain_AddTransaction(t *testing.T) {
 	walletA := wallet.NewWallet()
 	walletB := wallet.NewWallet()
 	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
-	tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, chain)
-	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
-	chain.MineBlock()
+
+	balanceA, outsA1 := chain.UTXO.FindSpendableOutputs(walletA.BlockchainAddress(), math.MaxInt)
+	if balanceA != 0.1 {
+		t.Error("Balance should be equal to COINBASE_REWARD*2-0.1 but got", balanceA)
+	}
+	if len(outsA1) != 1 {
+		t.Error("Outs should be equal to 1 but got", len(outsA1))
+	}
+
+	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, walletA.PrivateKey(), walletA.PublicKey())
+
+	balanceA, outsA2 := chain.UTXO.FindSpendableOutputs(walletA.BlockchainAddress(), math.MaxInt)
+	if balanceA != 0 {
+		t.Error("Balance should be equal to COINBASE_REWARD*2-0.1 but got", balanceA)
+	}
+	if len(outsA2) != 0 {
+		t.Error("Outs should be equal to 0 but got", len(outsA2))
+	}
+
+	if chain.UTXO.isSpent[outsA1[0].Hash()] == false {
+		t.Error("Output should be spent")
+	}
 
 	if !isAdd {
 		t.Error("Tx should be added to tx pool")
 	}
 
+	balanceB, outsB := chain.UTXO.FindSpendableOutputs(walletB.BlockchainAddress(), math.MaxInt)
+	if balanceB != 0.1 {
+		t.Error("Balance should be equal to 0.1 but got", balanceB)
+	}
+	if len(outsB) != 1 {
+		t.Error("Outs should be equal to 1 but got", len(outsB))
+	}
+
 	assertPanic(t, func() {
-		tx2 := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.3, chain)
-		chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.3, tx2.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
+		chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.3, walletA.PrivateKey(), walletA.PublicKey())
 	})
 
+	chain.MineBlock()
+	balanceA, _ = chain.UTXO.FindSpendableOutputs(walletA.BlockchainAddress(), math.MaxInt)
+	if balanceA != COINBASE_REWARD*2-0.1 {
+		t.Error("Balance should be equal to COINBASE_REWARD but got", balanceA)
+	}
 }
 
 func TestBlockchain_ClearPool(t *testing.T) {
@@ -161,8 +132,7 @@ func TestBlockchain_ClearPool(t *testing.T) {
 	walletB := wallet.NewWallet()
 	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
 	chain.MineBlock()
-	tx := NewTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, chain)
-	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(walletA.PrivateKey()), walletA.PublicKey())
+	isAdd := chain.AddTransaction(walletA.BlockchainAddress(), walletB.BlockchainAddress(), COINBASE_REWARD, walletA.PrivateKey(), walletA.PublicKey())
 
 	if !isAdd {
 		t.Error("Tx should be added to tx pool")
@@ -197,8 +167,7 @@ func TestBlockchain_Mining(t *testing.T) {
 	}
 
 	walletB := wallet.NewWallet()
-	tx := NewTransaction(miner.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, chain)
-	chain.AddTransaction(miner.BlockchainAddress(), walletB.BlockchainAddress(), 0.1, tx.GenerateSignature(miner.PrivateKey()), miner.PublicKey())
+	chain.AddTransaction(miner.BlockchainAddress(), walletB.BlockchainAddress(), COINBASE_REWARD, miner.PrivateKey(), miner.PublicKey())
 	chain.MineBlock()
 
 	if len(chain.Blocks) <= 2 {
@@ -212,7 +181,6 @@ func TestBlockchain_Mining(t *testing.T) {
 		t.Error("Should be a coinbase transaction")
 	}
 }
-
 func TestBlockchain_VerifyTxSignature(t *testing.T) {
 	walletA := wallet.NewWallet()
 	walletB := wallet.NewWallet()

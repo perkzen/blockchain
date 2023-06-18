@@ -18,7 +18,7 @@ type CommandLine struct {
 
 const (
 	START_NODE = "start-node"
-	SEND       = "Send"
+	SEND       = "send"
 	BALANCE    = "balance"
 )
 
@@ -82,12 +82,12 @@ func (cli *CommandLine) Run() {
 	port := startNodeCmd.Uint("port", 3000, "TCP Port Number for Blockchain server")
 
 	sendCmd := flag.NewFlagSet(SEND, flag.ExitOnError)
-	node := sendCmd.Uint("node", 3000, "TCP Port Number for Blockchain server")
 	to := sendCmd.String("to", "", "Recipient of the transaction")
 	amount := sendCmd.Float64("amount", 0, "Amount to send")
+	node := sendCmd.Uint("node", 3000, "TCP Port Number for Blockchain server")
 
 	balanceCmd := flag.NewFlagSet(BALANCE, flag.ExitOnError)
-	node = balanceCmd.Uint("node", 3000, "TCP Port Number for Blockchain server")
+	balanceNode := balanceCmd.Uint("node", 3000, "TCP Port Number for Blockchain server")
 
 	switch os.Args[1] {
 	case START_NODE:
@@ -120,6 +120,6 @@ func (cli *CommandLine) Run() {
 	}
 
 	if balanceCmd.Parsed() {
-		cli.GetBalance(uint16(*node))
+		cli.GetBalance(uint16(*balanceNode))
 	}
 }

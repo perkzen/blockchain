@@ -27,12 +27,12 @@ func TestNewTransaction(t *testing.T) {
 
 func TestTx_isCoinbase(t *testing.T) {
 	miner := wallet.NewWallet()
-	ctx := CoinbaseTx(miner.BlockchainAddress())
+	chain := InitBlockchain(miner.BlockchainAddress(), 3000)
+	ctx := CoinbaseTx(chain)
 
 	if !ctx.isCoinbase() {
 		t.Error("Transaction should be coinbase")
 	}
-
 }
 
 func TestTx_GenerateSignature(t *testing.T) {

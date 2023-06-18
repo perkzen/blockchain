@@ -92,6 +92,17 @@ func (s *Server) GetBlockchain() *blockchain.Blockchain {
 	return chain
 }
 
+func (s *Server) ValidateBlock() {
+	// new get block
+	// validate it with proof of work
+	// if 51% thinks that its valid, add it to the chain
+
+}
+
+func (s *Server) BroadcastNewBlock() {
+	// broadcast new block to all nodes
+}
+
 func (s *Server) SyncChains() {
 	ticker := time.NewTicker(CHAIN_SYNC_TIMEOUT)
 	quit := make(chan struct{})
