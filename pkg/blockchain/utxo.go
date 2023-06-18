@@ -6,6 +6,10 @@ import (
 	"fmt"
 )
 
+// Output represents a transaction output.
+// Idx is the index of the output in the transaction.
+// TxID is the ID of the transaction that contains the output.
+// Timestamp is the transaction timestamp.
 type Output struct {
 	TxOutput  TxOutput
 	Idx       int
