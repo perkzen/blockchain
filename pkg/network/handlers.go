@@ -54,11 +54,12 @@ func (s *Server) chainHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) nodeHandler(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
-		w.Header().Add("Content-Type", "application/json")
-		w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-		nodes, _ := json.Marshal(knownNodes)
+	if req.Method == http.MethodGet {
+
+		nodes, _ := json.Marshal(s.knownNodes)
 
 		_, err := io.WriteString(w, string(nodes))
 		if err != nil {
@@ -67,8 +68,6 @@ func (s *Server) nodeHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.Method == http.MethodPost {
-		w.Header().Add("Content-Type", "application/json")
-		w.Header().Add("Access-Control-Allow-Origin", "*")
 
 		type ReqBody struct {
 			Node string `json:"node"`
@@ -91,11 +90,12 @@ func (s *Server) nodeHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) walletHandler(w http.ResponseWriter, req *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+
 	if req.Method != http.MethodGet {
 		fmt.Println("ERROR: Invalid Method")
 	}
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	wallet := s.GetWallet()
 	chain := s.GetBlockchain()
@@ -116,4 +116,11 @@ func (s *Server) walletHandler(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Fatal("ERROR: Failed to send JSON")
 	}
+}
+
+func (s *Server) initHandlers() {
+	http.HandleFunc("/", s.chainHandler)
+	http.HandleFunc("/transaction", s.transactionHandler)
+	http.HandleFunc("/nodes", s.nodeHandler)
+	http.HandleFunc("/wallet", s.walletHandler)
 }

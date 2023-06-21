@@ -16,21 +16,21 @@ func (s *Server) AddNodeIfNotKnown(node string) {
 	}
 
 	var found bool
-	for _, knownNode := range knownNodes {
+	for _, knownNode := range s.knownNodes {
 		if knownNode == node {
 			found = true
 			break
 		}
 	}
 	if !found {
-		knownNodes = append(knownNodes, node)
+		s.knownNodes = append(s.knownNodes, node)
 	}
 }
 
 func (s *Server) AddNode(node string) {
 	s.AddNodeIfNotKnown(node)
 
-	for _, knownNode := range knownNodes {
+	for _, knownNode := range s.knownNodes {
 		if knownNode == node {
 			continue
 		}
@@ -60,8 +60,8 @@ func (s *Server) AddNode(node string) {
 	}
 }
 
-func getNodes() {
-	for _, node := range knownNodes {
+func (s *Server) getNodes() {
+	for _, node := range s.knownNodes {
 		res, err := http.Get(fmt.Sprintf("http://%s/nodes", node))
 		if err != nil {
 			log.Fatal(err)
@@ -80,14 +80,14 @@ func getNodes() {
 		for _, node := range nodes {
 			// check if node is already in knownNodes
 			var found bool
-			for _, knownNode := range knownNodes {
+			for _, knownNode := range s.knownNodes {
 				if knownNode == node {
 					found = true
 					break
 				}
 			}
 			if !found {
-				knownNodes = append(knownNodes, node)
+				s.knownNodes = append(s.knownNodes, node)
 			}
 		}
 	}
@@ -102,7 +102,7 @@ func (s *Server) SearchNodes() {
 			select {
 			case <-ticker.C:
 				fmt.Println("👷‍ Searching for new nodes...")
-				getNodes()
+				s.getNodes()
 			case <-quit:
 				ticker.Stop()
 				return
