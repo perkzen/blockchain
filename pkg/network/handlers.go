@@ -68,26 +68,26 @@ func (s *Server) handleNode(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	if req.Method == http.MethodPost {
-
-		type ReqBody struct {
-			Node string `json:"node"`
-		}
-
-		var body ReqBody
-		err := json.NewDecoder(req.Body).Decode(&body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		s.AddNodeIfNotKnown(body.Node)
-
-		_, err = io.WriteString(w, "Node added successfully")
-		if err != nil {
-			log.Fatal("ERROR: Failed to send JSON")
-		}
-	}
+	//if req.Method == http.MethodPost {
+	//
+	//	type ReqBody struct {
+	//		Node string `json:"node"`
+	//	}
+	//
+	//	var body ReqBody
+	//	err := json.NewDecoder(req.Body).Decode(&body)
+	//	if err != nil {
+	//		http.Error(w, err.Error(), http.StatusBadRequest)
+	//		return
+	//	}
+	//
+	//	s.AddNodeIfNotKnown(body.Node)
+	//
+	//	_, err = io.WriteString(w, "Node added successfully")
+	//	if err != nil {
+	//		log.Fatal("ERROR: Failed to send JSON")
+	//	}
+	//}
 }
 
 func (s *Server) handleWallet(w http.ResponseWriter, req *http.Request) {
@@ -121,7 +121,7 @@ func (s *Server) handleWallet(w http.ResponseWriter, req *http.Request) {
 
 func (s *Server) handleWs(ws *websocket.Conn) {
 	fmt.Println("New connection established:", ws.RemoteAddr())
-	ReadLoop(ws)
+	ReadLoop(ws, s)
 }
 
 func (s *Server) initHandlers() {

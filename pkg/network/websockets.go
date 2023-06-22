@@ -11,7 +11,8 @@ type Event string
 
 const (
 	BLOCK_MINED Event = "BLOCK_MINED"
-	NEW_NODE    Event = "NEW_NODE"
+	CONNECT     Event = "CONNECT"
+	DISCONNECT  Event = "DISCONNECT"
 )
 
 type Message[T any] struct {
@@ -19,7 +20,7 @@ type Message[T any] struct {
 	Event Event `json:"event"`
 }
 
-func ReadLoop(ws *websocket.Conn) {
+func ReadLoop(ws *websocket.Conn, server *Server) {
 	buf := make([]byte, 1024)
 	for {
 		n, err := ws.Read(buf)
@@ -41,8 +42,19 @@ func ReadLoop(ws *websocket.Conn) {
 		switch msg.Event {
 		case BLOCK_MINED:
 			fmt.Println("Block mined")
-		case NEW_NODE:
+		case CONNECT:
 			fmt.Println("New node")
+			server.knownNodes = append(server.knownNodes, msg.Data)
+		case DISCONNECT:
+			fmt.Println("Node disconnected")
+			for i, node := range server.knownNodes {
+				if node == msg.Data {
+					server.knownNodes = append(server.knownNodes[:i], server.knownNodes[i+1:]...)
+					break
+				}
+			}
+		default:
+			fmt.Println("Unknown event")
 		}
 
 		fmt.Println("Received message:", msg)
@@ -65,8 +77,8 @@ func EmitEvent[T any](ws *websocket.Conn, event Event, data T) {
 	}
 }
 
-func NewWebSocketClient() *websocket.Conn {
-	conn, err := websocket.Dial("ws://localhost:3001/ws", "", "http://localhost")
+func NewWebSocketClient(url string) *websocket.Conn {
+	conn, err := websocket.Dial(url, "", "http://localhost")
 	if err != nil {
 		fmt.Println("ERROR: Failed to connect to websocket")
 		return nil
