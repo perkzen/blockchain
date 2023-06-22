@@ -7,4 +7,4 @@ require (
 	golang.org/x/crypto v0.10.0
 )
 
-require golang.org/x/net v0.11.0 // indirect
+require golang.org/x/net v0.11.0
