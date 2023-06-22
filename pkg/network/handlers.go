@@ -3,12 +3,13 @@ package network
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/net/websocket"
 	"io"
 	"log"
 	"net/http"
 )
 
-func (s *Server) transactionHandler(w http.ResponseWriter, req *http.Request) {
+func (s *Server) handleTransactions(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		fmt.Println("ERROR: Invalid Method")
 	}
@@ -38,7 +39,7 @@ func (s *Server) transactionHandler(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func (s *Server) chainHandler(w http.ResponseWriter, req *http.Request) {
+func (s *Server) handleChain(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
 		fmt.Println("ERROR: Invalid Method")
 	}
@@ -53,7 +54,7 @@ func (s *Server) chainHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *Server) nodeHandler(w http.ResponseWriter, req *http.Request) {
+func (s *Server) handleNode(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
@@ -89,7 +90,7 @@ func (s *Server) nodeHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *Server) walletHandler(w http.ResponseWriter, req *http.Request) {
+func (s *Server) handleWallet(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
@@ -118,9 +119,15 @@ func (s *Server) walletHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func (s *Server) handleWs(ws *websocket.Conn) {
+	fmt.Println("New connection established:", ws.RemoteAddr())
+	ReadLoop(ws)
+}
+
 func (s *Server) initHandlers() {
-	http.HandleFunc("/", s.chainHandler)
-	http.HandleFunc("/transaction", s.transactionHandler)
-	http.HandleFunc("/nodes", s.nodeHandler)
-	http.HandleFunc("/wallet", s.walletHandler)
+	http.HandleFunc("/", s.handleChain)
+	http.HandleFunc("/transaction", s.handleTransactions)
+	http.HandleFunc("/nodes", s.handleNode)
+	http.HandleFunc("/wallet", s.handleWallet)
+	http.Handle("/ws", websocket.Handler(s.handleWs))
 }
