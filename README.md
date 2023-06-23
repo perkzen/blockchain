@@ -13,6 +13,8 @@ go run cmd/main.go balance -node 3000
 - [ ] Persistence
 - [ ] Miner fees
 - [ ] Max transaction in block (100 txs)
+- [ ] Max number of coins
+- [ ] Difficulty adjustment
 
 ### DONE
 - [X] Proof of work
@@ -21,5 +23,4 @@ go run cmd/main.go balance -node 3000
 - [X] Peer to peer network
 - [X] Longest chain rule 
 - [X] UTXO model
-- [X] Use sockets for peer to peer network
 
