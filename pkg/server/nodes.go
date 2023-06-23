@@ -16,7 +16,7 @@ func (s *Server) removeNode(addr string) {
 
 func broadcastEvent[T any](s *Server, event Event, data T) {
 	for _, ws := range s.nodes {
-		emitEvent(ws, NEW_NODE, data)
+		emitEvent(ws, event, data)
 	}
 }
 
