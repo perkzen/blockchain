@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"blockchain/pkg/network"
+	"blockchain/pkg/server"
 	"bytes"
 	"flag"
 	"fmt"
@@ -38,7 +38,7 @@ func (cli *CommandLine) validateArgs() {
 }
 
 func (cli *CommandLine) StartServer(port uint16) {
-	app := network.NewBlockchainServer(port)
+	app := server.NewBlockchainServer(port)
 	app.Run()
 }
 

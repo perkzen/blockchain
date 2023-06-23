@@ -1,4 +1,4 @@
-package network
+package server
 
 import (
 	"encoding/json"
@@ -10,11 +10,14 @@ import (
 )
 
 func (s *Server) handleTransactions(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		fmt.Println("ERROR: Invalid Method")
-	}
 	w.Header().Add("Content-Type", "application/json")
 	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	if req.Method != http.MethodPost {
+		fmt.Println("ERROR: Invalid Method")
+		http.Error(w, "Invalid Method", http.StatusBadRequest)
+		return
+	}
 
 	type ReqBody struct {
 		Recipient string  `json:"recipient"`
@@ -34,23 +37,28 @@ func (s *Server) handleTransactions(w http.ResponseWriter, req *http.Request) {
 
 	_, err = io.WriteString(w, "Transaction received and will be added to the blockchain")
 	if err != nil {
-		log.Fatal("ERROR: Failed to send JSON")
+		log.Println("ERROR: Failed to send JSON")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 }
 
 func (s *Server) handleChain(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
-		fmt.Println("ERROR: Invalid Method")
-	}
 	w.Header().Add("Content-Type", "application/json")
 	w.Header().Add("Access-Control-Allow-Origin", "*")
+
+	if req.Method != http.MethodGet {
+		fmt.Println("ERROR: Invalid Method")
+		http.Error(w, "Invalid Method", http.StatusBadRequest)
+		return
+	}
 
 	chain := s.GetBlockchain()
 	m, _ := chain.MarshalJSON()
 	_, err := io.WriteString(w, string(m[:]))
 	if err != nil {
-		log.Fatal("ERROR: Failed to send JSON")
+		log.Println("ERROR: Failed to send JSON")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 }
 
@@ -58,16 +66,21 @@ func (s *Server) handleNode(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 
-	if req.Method == http.MethodGet {
-
-		addresses := s.getNodeAddresses()
-		nodes, _ := json.Marshal(addresses)
-
-		_, err := io.WriteString(w, string(nodes))
-		if err != nil {
-			log.Fatal("ERROR: Failed to send JSON")
-		}
+	if req.Method != http.MethodGet {
+		fmt.Println("ERROR: Invalid Method")
+		http.Error(w, "Invalid Method", http.StatusBadRequest)
+		return
 	}
+
+	addresses := s.getNodeAddresses()
+	nodes, _ := json.Marshal(addresses)
+
+	_, err := io.WriteString(w, string(nodes))
+	if err != nil {
+		log.Println("ERROR: Failed to send JSON")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
 }
 
 func (s *Server) handleWallet(w http.ResponseWriter, req *http.Request) {
@@ -76,6 +89,8 @@ func (s *Server) handleWallet(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method != http.MethodGet {
 		fmt.Println("ERROR: Invalid Method")
+		http.Error(w, "Invalid Method", http.StatusBadRequest)
+		return
 	}
 
 	wallet := s.GetWallet()
@@ -95,18 +110,19 @@ func (s *Server) handleWallet(w http.ResponseWriter, req *http.Request) {
 	m, _ := json.Marshal(respBody)
 	_, err := io.WriteString(w, string(m[:]))
 	if err != nil {
-		log.Fatal("ERROR: Failed to send JSON")
+		log.Println("ERROR: Failed to send JSON")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 }
 
 func (s *Server) handleWs(ws *websocket.Conn) {
 	fmt.Println("New connection established:", ws.RemoteAddr())
-	ReadLoop(ws, s)
+	readLoop(ws, s)
 }
 
 func (s *Server) initHandlers() {
 	http.HandleFunc("/", s.handleChain)
-	http.HandleFunc("/transaction", s.handleTransactions)
+	http.HandleFunc("/transactions", s.handleTransactions)
 	http.HandleFunc("/nodes", s.handleNode)
 	http.HandleFunc("/wallet", s.handleWallet)
 	http.Handle("/ws", websocket.Handler(s.handleWs))

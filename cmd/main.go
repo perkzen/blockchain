@@ -1,14 +1,9 @@
 package main
 
 import (
-	"blockchain/pkg/cli"
-	"log"
+	"blockchain/pkg/client"
 	"os"
 )
-
-func init() {
-	log.SetPrefix("Blockchain: ")
-}
 
 func main() {
 	defer os.Exit(0)

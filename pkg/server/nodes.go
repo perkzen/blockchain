@@ -1,4 +1,4 @@
-package network
+package server
 
 import (
 	"fmt"
@@ -21,9 +21,9 @@ func (s *Server) connectToKnownNodes() {
 			continue
 		}
 
-		client := NewWebSocketClient("ws://" + addr + "/ws")
+		client := newWebSocketClient("ws://" + addr + "/ws")
 		s.nodes[addr] = client
-		EmitEvent(client, CONNECT, connAddr)
+		emitEvent(client, CONNECT, connAddr)
 
 	}
 }

@@ -1,4 +1,4 @@
-package network
+package server
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func NewBlockchainServer(port uint16) *Server {
 		if node == fmt.Sprintf("localhost:%d", s.Port()) {
 			continue
 		}
-		s.nodes[node] = NewWebSocketClient("ws://" + node + "/ws")
+		s.nodes[node] = newWebSocketClient("ws://" + node + "/ws")
 	}
 
 	return s
@@ -48,7 +48,7 @@ func (s *Server) gracefulShutdown() {
 		<-ch
 		fmt.Printf("\nShutting down server on: http//:localhost:%d\n", s.Port())
 		for _, conn := range s.nodes {
-			EmitEvent(conn, DISCONNECT, fmt.Sprintf("localhost:%d", s.Port()))
+			emitEvent(conn, DISCONNECT, fmt.Sprintf("localhost:%d", s.Port()))
 		}
 		os.Exit(0)
 	}()

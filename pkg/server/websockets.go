@@ -1,4 +1,4 @@
-package network
+package server
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ type Message[T any] struct {
 	Event Event `json:"event"`
 }
 
-func ReadLoop(ws *websocket.Conn, s *Server) {
+func readLoop(ws *websocket.Conn, s *Server) {
 	buf := make([]byte, 1024)
 	for {
 		n, err := ws.Read(buf)
@@ -53,7 +53,7 @@ func ReadLoop(ws *websocket.Conn, s *Server) {
 	}
 }
 
-func EmitEvent[T any](ws *websocket.Conn, event Event, data T) {
+func emitEvent[T any](ws *websocket.Conn, event Event, data T) {
 	msg := Message[T]{
 		Data:  data,
 		Event: event,
@@ -64,7 +64,7 @@ func EmitEvent[T any](ws *websocket.Conn, event Event, data T) {
 	}
 }
 
-func NewWebSocketClient(url string) *websocket.Conn {
+func newWebSocketClient(url string) *websocket.Conn {
 	conn, err := websocket.Dial(url, "", "http://localhost")
 	if err != nil {
 		fmt.Println("ERROR: Failed to connect to websocket")
