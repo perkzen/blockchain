@@ -9,12 +9,10 @@ go run cmd/main.go balance -node 3000
 ```
 
 ### Add in the future (maybe)
-- [ ] Use sockets for peer to peer network
 - [ ] Merkle trees
 - [ ] Persistence
 - [ ] Miner fees
 - [ ] Max transaction in block (100 txs)
-- [ ] remove node on disconnect (graceful shutdown)
 
 ### DONE
 - [X] Proof of work
@@ -23,4 +21,5 @@ go run cmd/main.go balance -node 3000
 - [X] Peer to peer network
 - [X] Longest chain rule 
 - [X] UTXO model
+- [X] Use sockets for peer to peer network
 

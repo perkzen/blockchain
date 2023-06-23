@@ -1,6 +1,9 @@
 package network
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 func (s *Server) addNode() {
 
@@ -25,7 +28,7 @@ func (s *Server) connectToKnownNodes() {
 }
 
 func (s *Server) getNodeAddresses() []string {
-	var addresses []string
+	addresses := []string{"localhost:" + strconv.Itoa(int(s.Port()))}
 	for addr := range s.nodes {
 		addresses = append(addresses, addr)
 	}
