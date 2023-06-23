@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
-	"io"
 )
 
 type Event string
@@ -25,10 +24,6 @@ func ReadLoop(ws *websocket.Conn, server *Server) {
 	for {
 		n, err := ws.Read(buf)
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			fmt.Println("ERROR: Failed to read from websocket")
 			continue
 		}
 
@@ -44,15 +39,10 @@ func ReadLoop(ws *websocket.Conn, server *Server) {
 			fmt.Println("Block mined")
 		case CONNECT:
 			fmt.Println("New node")
-			server.knownNodes = append(server.knownNodes, msg.Data)
+			server.nodes[msg.Data] = ws
 		case DISCONNECT:
 			fmt.Println("Node disconnected")
-			for i, node := range server.knownNodes {
-				if node == msg.Data {
-					server.knownNodes = append(server.knownNodes[:i], server.knownNodes[i+1:]...)
-					break
-				}
-			}
+			delete(server.nodes, msg.Data)
 		default:
 			fmt.Println("Unknown event")
 		}

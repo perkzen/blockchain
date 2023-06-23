@@ -20,8 +20,7 @@ func (s *Server) getLongestChain() *blockchain.Blockchain {
 		chains[fmt.Sprintf("localhost:%d", s.Port())] = chain.Length()
 	}
 
-	for _, node := range s.knownNodes {
-
+	for node, _ := range s.nodes {
 		// skip self
 		if node == fmt.Sprintf("localhost:%d", s.Port()) {
 			continue

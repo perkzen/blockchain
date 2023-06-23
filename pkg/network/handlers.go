@@ -60,7 +60,8 @@ func (s *Server) handleNode(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method == http.MethodGet {
 
-		nodes, _ := json.Marshal(s.knownNodes)
+		addresses := s.getNodeAddresses()
+		nodes, _ := json.Marshal(addresses)
 
 		_, err := io.WriteString(w, string(nodes))
 		if err != nil {
