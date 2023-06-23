@@ -11,7 +11,7 @@ func (s *Server) removeNode() {
 }
 
 func (s *Server) connectToKnownNodes() {
-	for addr, _ := range s.nodes {
+	for addr := range s.nodes {
 		connAddr := fmt.Sprintf("localhost:%d", s.Port())
 		if addr == connAddr {
 			continue
@@ -26,7 +26,7 @@ func (s *Server) connectToKnownNodes() {
 
 func (s *Server) getNodeAddresses() []string {
 	var addresses []string
-	for addr, _ := range s.nodes {
+	for addr := range s.nodes {
 		addresses = append(addresses, addr)
 	}
 
