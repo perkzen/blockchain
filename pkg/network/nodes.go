@@ -2,15 +2,16 @@ package network
 
 import (
 	"fmt"
+	"golang.org/x/net/websocket"
 	"strconv"
 )
 
-func (s *Server) addNode() {
-
+func (s *Server) addNode(addr string, ws *websocket.Conn) {
+	s.nodes[addr] = ws
 }
 
-func (s *Server) removeNode() {
-
+func (s *Server) removeNode(addr string) {
+	delete(s.nodes, addr)
 }
 
 func (s *Server) connectToKnownNodes() {

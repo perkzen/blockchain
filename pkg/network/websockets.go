@@ -19,7 +19,7 @@ type Message[T any] struct {
 	Event Event `json:"event"`
 }
 
-func ReadLoop(ws *websocket.Conn, server *Server) {
+func ReadLoop(ws *websocket.Conn, s *Server) {
 	buf := make([]byte, 1024)
 	for {
 		n, err := ws.Read(buf)
@@ -27,7 +27,7 @@ func ReadLoop(ws *websocket.Conn, server *Server) {
 			continue
 		}
 
-		var msg Message[string]
+		var msg Message[any]
 		err = json.Unmarshal(buf[:n], &msg)
 		if err != nil {
 			fmt.Println("ERROR: Failed to unmarshal JSON")
@@ -39,20 +39,17 @@ func ReadLoop(ws *websocket.Conn, server *Server) {
 			fmt.Println("Block mined")
 		case CONNECT:
 			fmt.Println("New node")
-			server.nodes[msg.Data] = ws
+			address := msg.Data.(string)
+			s.addNode(address, ws)
 		case DISCONNECT:
 			fmt.Println("Node disconnected")
-			delete(server.nodes, msg.Data)
+			address := msg.Data.(string)
+			s.removeNode(address)
 		default:
 			fmt.Println("Unknown event")
 		}
 
 		fmt.Println("Received message:", msg)
-		//_, err = ws.Write([]byte("Received message: " + msg))
-		//if err != nil {
-		//	fmt.Println("ERROR: Failed to write to websocket")
-		//	continue
-		//}
 	}
 }
 
