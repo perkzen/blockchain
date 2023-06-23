@@ -31,7 +31,7 @@ func (s *Server) handleTransactions(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	chain := s.GetBlockchain()
+	chain := s.getBlockchain()
 	wallet := s.GetWallet()
 	chain.AddTransaction(wallet.BlockchainAddress(), body.Recipient, 0.1, wallet.PrivateKey(), wallet.PublicKey())
 
@@ -53,7 +53,7 @@ func (s *Server) handleChain(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	chain := s.GetBlockchain()
+	chain := s.getBlockchain()
 	m, _ := chain.MarshalJSON()
 	_, err := io.WriteString(w, string(m[:]))
 	if err != nil {
@@ -94,7 +94,7 @@ func (s *Server) handleWallet(w http.ResponseWriter, req *http.Request) {
 	}
 
 	wallet := s.GetWallet()
-	chain := s.GetBlockchain()
+	chain := s.getBlockchain()
 	balance := chain.UTXO.GetBalance(wallet.BlockchainAddress())
 
 	type RespBody struct {

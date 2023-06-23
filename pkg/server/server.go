@@ -58,6 +58,7 @@ func (s *Server) Run() {
 	s.gracefulShutdown()
 	s.initHandlers()
 	s.connectToKnownNodes()
+	s.getBlockchain()
 
 	//s.AddNode("localhost:" + strconv.Itoa(int(s.Port())))
 	//s.SearchNodes()

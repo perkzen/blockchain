@@ -2,7 +2,6 @@ package server
 
 import (
 	"blockchain/pkg/blockchain"
-	"blockchain/pkg/wallet"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -16,19 +15,22 @@ func (s *Server) getLongestChain() *blockchain.Blockchain {
 	chains := make(map[string]int)
 	chain, ok := s.cache[BLOCKCHAIN].(*blockchain.Blockchain)
 
+	serverAddr := fmt.Sprintf("localhost:%d", s.Port())
+
 	if ok {
-		chains[fmt.Sprintf("localhost:%d", s.Port())] = chain.Length()
+		chains[serverAddr] = chain.Length()
 	}
 
+	// searching nearby nodes for the longest chain
 	for node := range s.nodes {
 		// skip self
-		if node == fmt.Sprintf("localhost:%d", s.Port()) {
+		if node == serverAddr {
 			continue
 		}
 
 		res, err := http.Get(fmt.Sprintf("http://%s/", node))
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
 		}
 		if res.StatusCode == http.StatusOK {
 
@@ -38,37 +40,35 @@ func (s *Server) getLongestChain() *blockchain.Blockchain {
 				log.Fatal(err)
 			}
 			chains[node] = c.Length()
-			fmt.Printf("🔗 %s: %d\n", node, c.Length())
+			fmt.Printf("📦🔗📦 %s: %d\n", node, c.Length())
 		}
 	}
 
 	// get the longest chain
 	var longestChainLength int
-	var longestChainNode string
+	var longestChainAddr string
 	for node, length := range chains {
 		if length > longestChainLength {
 			longestChainLength = length
-			longestChainNode = node
+			longestChainAddr = node
 		}
 	}
-	fmt.Printf("🔗 Longest chain: %s: %d\n", longestChainNode, longestChainLength)
+	fmt.Printf("📦🔗📦 Longest chain: %s: %d\n", longestChainAddr, longestChainLength)
 
-	if longestChainNode == fmt.Sprintf("localhost:%d", s.Port()) {
+	// if the longest chain is the current node, return the chain
+	if longestChainAddr == serverAddr {
 		return chain
 	}
 
 	// if no other nodes are running, create a new blockchain
 	if longestChainLength == 0 {
-		fmt.Printf("🔗 No other nodes running, creating new blockchain\n")
-		minersWallet := wallet.NewWallet()
-		s.cache[WALLET] = minersWallet
-		longestBlockchain = blockchain.InitBlockchain(minersWallet.BlockchainAddress(), s.Port())
-		s.cache[BLOCKCHAIN] = longestBlockchain
+		fmt.Printf("📦🔗📦 No other nodes running, creating new blockchain\n")
+		longestBlockchain = s.createBlockchain()
 		return longestBlockchain
 	}
 
 	// get chain from longest chain node
-	res, err := http.Get(fmt.Sprintf("http://%s/", longestChainNode))
+	res, err := http.Get(fmt.Sprintf("http://%s/", longestChainAddr))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -77,17 +77,23 @@ func (s *Server) getLongestChain() *blockchain.Blockchain {
 	if err != nil {
 		log.Fatal(err)
 	}
-	s.cache[BLOCKCHAIN] = c
+
 	longestBlockchain = c
 	return longestBlockchain
 }
 
-func (s *Server) GetBlockchain() *blockchain.Blockchain {
+func (s *Server) getBlockchain() *blockchain.Blockchain {
 	chain, ok := s.cache[BLOCKCHAIN].(*blockchain.Blockchain)
 	if !ok {
 		chain = s.getLongestChain()
 		s.cache[BLOCKCHAIN] = chain
 	}
+	return chain
+}
+
+func (s *Server) createBlockchain() *blockchain.Blockchain {
+	w := s.GetWallet()
+	chain := blockchain.InitBlockchain(w.BlockchainAddress(), s.Port())
 	return chain
 }
 
@@ -124,7 +130,7 @@ func (s *Server) MineBlock() {
 	ticker := time.NewTicker(MINING_TIMEOUT)
 	quit := make(chan struct{})
 
-	chain := s.GetBlockchain()
+	chain := s.getBlockchain()
 	go func() {
 		for {
 			select {
