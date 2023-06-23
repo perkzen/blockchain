@@ -30,7 +30,7 @@ func NewBlockchainServer(port uint16) *Server {
 		if node == fmt.Sprintf("localhost:%d", s.Port()) {
 			continue
 		}
-		s.nodes[node] = newWebSocketClient("ws://" + node + "/ws")
+		s.nodes[node] = newWebSocketClient(node)
 	}
 
 	return s

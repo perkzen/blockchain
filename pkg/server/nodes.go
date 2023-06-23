@@ -2,29 +2,30 @@ package server
 
 import (
 	"fmt"
-	"golang.org/x/net/websocket"
 	"strconv"
 )
 
-func (s *Server) addNode(addr string, ws *websocket.Conn) {
-	s.nodes[addr] = ws
+func (s *Server) addNode(addr string) {
+	client := newWebSocketClient(addr)
+	s.nodes[addr] = client
 }
 
 func (s *Server) removeNode(addr string) {
 	delete(s.nodes, addr)
 }
 
+func broadcastEvent[T any](s *Server, event Event, data T) {
+	for _, ws := range s.nodes {
+		emitEvent(ws, NEW_NODE, data)
+	}
+}
+
 func (s *Server) connectToKnownNodes() {
 	for addr := range s.nodes {
 		connAddr := fmt.Sprintf("localhost:%d", s.Port())
-		if addr == connAddr {
-			continue
-		}
-
-		client := newWebSocketClient("ws://" + addr + "/ws")
+		client := newWebSocketClient(addr)
 		s.nodes[addr] = client
 		emitEvent(client, CONNECT, connAddr)
-
 	}
 }
 

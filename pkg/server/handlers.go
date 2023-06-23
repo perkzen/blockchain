@@ -116,7 +116,6 @@ func (s *Server) handleWallet(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) handleWs(ws *websocket.Conn) {
-	fmt.Println("New connection established:", ws.RemoteAddr())
 	readLoop(ws, s)
 }
 
