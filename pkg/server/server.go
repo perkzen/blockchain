@@ -60,7 +60,7 @@ func (s *Server) Run() {
 	s.connectToKnownNodes()
 	s.getBlockchain()
 	s.startMining()
-	//s.SyncChains()
+	s.SyncChains()
 	fmt.Printf("Listening on: http//:localhost:%d\n", s.Port())
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+strconv.Itoa(int(s.Port())), nil))
 

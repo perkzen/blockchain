@@ -90,8 +90,6 @@ func emitEvent[T interface{}](ws *websocket.Conn, event Event, data T) {
 
 	m, _ := msg.MarshallJSON()
 
-	//websocket.JSON.Send(ws, msg)
-
 	_, err := ws.Write(m)
 	if err != nil {
 		fmt.Println(err)
