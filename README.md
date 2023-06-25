@@ -35,19 +35,19 @@ go run cmd/main.go balance -node 3000
 ```
 
 ### Server Endpoints
- `GET` http://localhost/
+ `GET` http://localhost:3000/
 
 - Retrieves blockchain 
 
-`GET` http://localhost/nodes
+`GET` http://localhost:3000/nodes
 
 - Retries all connected nodes
 
-`GET` http://localhost/wallet
+`GET` http://localhost:3000/wallet
 
 - Retries wallet address and balance
 
-`POST` http://localhost/transacions
+`POST` http://localhost:3000/transacions
 - Create adds new transactions to blockchains the transaction pool
 
 

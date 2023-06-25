@@ -18,7 +18,7 @@ type Server struct {
 
 func NewBlockchainServer(port uint16) *Server {
 
-	knownNodes := []string{"localhost:3001"}
+	knownNodes := []string{"localhost:3000"}
 
 	s := &Server{
 		port:  port,
