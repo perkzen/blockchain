@@ -235,6 +235,7 @@ func TestBlockchain_AddBlock2(t *testing.T) {
 	block := chain.AddBlock()
 
 	pow := NewProofOfWork(block)
+	pow.Run()
 	valid := pow.IsValid(block.Nonce)
 
 	if !valid {
