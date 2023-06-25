@@ -59,4 +59,5 @@ go run cmd/main.go balance -node 3000
 - [ ] Max number of coins
 - [ ] Difficulty adjustment
 - [ ] Support for multiple wallets
+- [ ] add CLI commands to view chain
 
