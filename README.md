@@ -56,4 +56,5 @@ go run cmd/main.go balance -node 3000
 - [ ] Max transaction in block (100 txs)
 - [ ] Max number of coins
 - [ ] Difficulty adjustment
+- [ ] Support for multiple wallets
 
