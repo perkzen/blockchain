@@ -9,6 +9,8 @@
 - **Blockchain Structure**: GoBlockchain utilizes a chain of blocks to store and organize transactional data. Each block contains a list of transactions, a timestamp, and a unique identifier called a hash. The blocks are linked together using cryptographic hashes, ensuring the integrity and immutability of the data.
 
 
+- **UTXO Model**: GoBlockchain implements the UTXO (Unspent Transaction Output) model, which is widely used in blockchain systems. Instead of tracking account balances, transactions in the blockchain are represented as inputs and outputs. Each output is an unspent transaction that can be used as an input in subsequent transactions. The UTXO model provides an efficient way to verify transaction validity and ensure that funds are not double-spent.
+
 - **Proof-of-Work Consensus**: The project implements a proof-of-work (PoW) consensus mechanism, similar to that used by Bitcoin. Miners in the network compete to solve computationally intensive puzzles to validate and append new blocks to the blockchain. This consensus algorithm ensures the security and trustworthiness of the blockchain.
 
 
