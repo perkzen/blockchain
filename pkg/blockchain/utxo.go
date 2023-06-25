@@ -17,12 +17,12 @@ type Output struct {
 	Timestamp int64
 }
 
-// UTXO represents unspent transaction outputs.
-// outputs is a list of all outputs.
-// isSpent is a map of all outputs that have been spent.
+// UTXO represents unspent transaction Outputs.
+// Outputs is a list of all Outputs.
+// IsSpent is a map of all Outputs that have been spent.
 type UTXO struct {
-	outputs []Output
-	isSpent map[string]bool
+	Outputs []Output
+	IsSpent map[string]bool
 }
 
 func NewOutput(txOutput TxOutput, idx int, txID string, timestamp int64) Output {
@@ -36,18 +36,18 @@ func NewOutput(txOutput TxOutput, idx int, txID string, timestamp int64) Output 
 
 func NewUTXO() *UTXO {
 	return &UTXO{
-		outputs: []Output{},
-		isSpent: make(map[string]bool),
+		Outputs: []Output{},
+		IsSpent: make(map[string]bool),
 	}
 }
 
 func (utxo *UTXO) AddOutput(output Output) {
-	utxo.outputs = append(utxo.outputs, output)
-	utxo.isSpent[output.Hash()] = false
+	utxo.Outputs = append(utxo.Outputs, output)
+	utxo.IsSpent[output.Hash()] = false
 }
 
 func (utxo *UTXO) SpendOutput(hash string) {
-	utxo.isSpent[hash] = true
+	utxo.IsSpent[hash] = true
 }
 
 func (utxo *UTXO) FindSpendableOutputs(address string, amount float32) (float32, []Output) {
@@ -55,9 +55,9 @@ func (utxo *UTXO) FindSpendableOutputs(address string, amount float32) (float32,
 	var acc float32 = 0.0
 
 Work:
-	for _, out := range utxo.outputs {
+	for _, out := range utxo.Outputs {
 		if out.TxOutput.CanBeUnlocked(address) {
-			if !utxo.isSpent[out.Hash()] {
+			if !utxo.IsSpent[out.Hash()] {
 				acc += out.TxOutput.Value
 				unspentOut = append(unspentOut, out)
 				if acc >= amount {
@@ -73,9 +73,9 @@ Work:
 func (utxo *UTXO) GetBalance(address string) float32 {
 	var balance float32 = 0.0
 
-	for _, out := range utxo.outputs {
+	for _, out := range utxo.Outputs {
 		if out.TxOutput.CanBeUnlocked(address) {
-			if !utxo.isSpent[out.Hash()] {
+			if !utxo.IsSpent[out.Hash()] {
 				balance += out.TxOutput.Value
 			}
 		}

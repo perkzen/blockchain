@@ -19,17 +19,15 @@ func NewBlock(prevHash string, transactions []*Tx) *Block {
 	b := &Block{
 		Transactions: transactions,
 		PrevHash:     prevHash,
-		Timestamp:    0,
+		Timestamp:    time.Now().UnixNano(),
 		Nonce:        0,
 	}
 
-	pow := NewProofOfWork(b)
-	nonce := pow.Validate()
-
-	b.Nonce = nonce
-	b.Timestamp = time.Now().UnixNano()
-
 	return b
+}
+
+func (b *Block) setNonce(nonce int) {
+	b.Nonce = nonce
 }
 
 func (b *Block) MarshalJSON() ([]byte, error) {

@@ -14,7 +14,7 @@ func TestPoW_ValidateReturnsTrue(t *testing.T) {
 		Nonce:        0,
 	})
 
-	nonce := pow.Validate()
+	nonce := pow.Run()
 
 	if !pow.IsValid(nonce) {
 		t.Error("IsValid should equal to true")

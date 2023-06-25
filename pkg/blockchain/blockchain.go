@@ -60,7 +60,12 @@ func (chain *Blockchain) CreateGenesisBlock() *Block {
 }
 
 func (chain *Blockchain) MineBlock() *Block {
-	return chain.AddBlock()
+	block := chain.AddBlock()
+
+	pow := NewProofOfWork(block)
+	pow.Run()
+
+	return block
 }
 
 func InitBlockchain(addr string, port uint16) *Blockchain {

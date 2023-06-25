@@ -44,7 +44,7 @@ func (cli *CommandLine) StartServer(port uint16) {
 
 func (cli *CommandLine) Send(to string, amount float64, node uint16) {
 	body := []byte(fmt.Sprintf(`{"recipient": "%s", "amount": %f}`, to, amount))
-	res, err := http.Post("http://localhost:"+strconv.Itoa(int(node))+"/transaction", "application/json", bytes.NewBuffer(body))
+	res, err := http.Post("http://localhost:"+strconv.Itoa(int(node))+"/transactions", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		log.Panic(err)
 	}

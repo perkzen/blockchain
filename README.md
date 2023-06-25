@@ -9,7 +9,6 @@ go run cmd/main.go balance -node 3000
 ```
 
 ### Add in the future (maybe)
-- [ ] Merkle trees
 - [ ] Persistence
 - [ ] Miner fees
 - [ ] Max transaction in block (100 txs)

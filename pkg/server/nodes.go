@@ -26,12 +26,6 @@ func (s *Server) removeNode(addr string) {
 	delete(s.nodes, addr)
 }
 
-func broadcastEvent[T any](s *Server, event Event, data T) {
-	for _, ws := range s.nodes {
-		emitEvent(ws, event, data)
-	}
-}
-
 func (s *Server) connectToKnownNodes() {
 	for addr := range s.nodes {
 		connAddr := fmt.Sprintf("localhost:%d", s.Port())

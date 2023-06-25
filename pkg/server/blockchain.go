@@ -97,15 +97,23 @@ func (s *Server) createBlockchain() *blockchain.Blockchain {
 	return chain
 }
 
-func (s *Server) ValidateBlock() {
-	// new get block
-	// validate it with proof of work
-	// if 51% thinks that its valid, add it to the chain
+func (s *Server) ValidateBlock(b blockchain.Block) {
+	pow := blockchain.NewProofOfWork(&b)
+	valid := pow.IsValid(b.Nonce)
+	if valid {
+		//chain := s.getBlockchain()
+		//chain.Blocks = append(chain.Blocks, &b)
+		fmt.Println("️📦  New block added to the chain.")
+		return
+	}
+	fmt.Println("️🔴 Invalid block.")
 
 }
 
-func (s *Server) BroadcastNewBlock() {
+func (s *Server) BroadcastNewBlock(b blockchain.Block) {
 	// broadcast new block to all nodes
+	broadcastEvent(s, NEW_BLOCK, b)
+
 }
 
 func (s *Server) SyncChains() {
@@ -116,7 +124,7 @@ func (s *Server) SyncChains() {
 		for {
 			select {
 			case <-ticker.C:
-				fmt.Println("📦 🔗 📦 Syncing chains...")
+				fmt.Println("♻️ Syncing chains...")
 				s.getLongestChain()
 			case <-quit:
 				ticker.Stop()
@@ -126,7 +134,7 @@ func (s *Server) SyncChains() {
 	}()
 }
 
-func (s *Server) MineBlock() {
+func (s *Server) startMining() {
 	ticker := time.NewTicker(MINING_TIMEOUT)
 	quit := make(chan struct{})
 
@@ -136,8 +144,8 @@ func (s *Server) MineBlock() {
 			select {
 			case <-ticker.C:
 				fmt.Println("⛏️  Mining block...")
-				chain.MineBlock()
-				fmt.Println("️✅  Block successfully mined")
+				block := chain.MineBlock()
+				s.BroadcastNewBlock(*block)
 			case <-quit:
 				ticker.Stop()
 				return

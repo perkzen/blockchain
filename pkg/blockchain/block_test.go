@@ -19,5 +19,4 @@ func TestBlock_Hash(t *testing.T) {
 	if hash == fmt.Sprintf("%x", []byte{}) {
 		t.Error("Hash should not be empty")
 	}
-
 }

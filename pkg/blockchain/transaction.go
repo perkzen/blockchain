@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// TxInput are references to previous outputs.
+// TxInput are references to previous Outputs.
 // ID is the ID of the transaction that contains the output.
 // OutIdx is the index of the output in the transaction.
 type TxInput struct {

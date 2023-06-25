@@ -100,7 +100,7 @@ func TestBlockchain_AddTransaction(t *testing.T) {
 		t.Error("Outs should be equal to 0 but got", len(outsA2))
 	}
 
-	if chain.UTXO.isSpent[outsA1[0].Hash()] == false {
+	if chain.UTXO.IsSpent[outsA1[0].Hash()] == false {
 		t.Error("Output should be spent")
 	}
 
@@ -198,4 +198,47 @@ func TestBlockchain_VerifyTxSignature(t *testing.T) {
 	if isValid {
 		t.Error("Transaction signature should not be valid")
 	}
+}
+
+func TestBlockchain_UTXO(t *testing.T) {
+	walletA := wallet.NewWallet()
+	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
+	isAdded := chain.AddTransaction(walletA.BlockchainAddress(), walletA.BlockchainAddress(), 0.1, walletA.PrivateKey(), walletA.PublicKey())
+
+	if !isAdded {
+		t.Error("Transaction should be added to tx pool")
+	}
+
+	//chain.MineBlock()
+
+	amount, _ := chain.UTXO.FindSpendableOutputs(walletA.BlockchainAddress(), math.MaxInt)
+
+	if amount != COINBASE_REWARD {
+		t.Error("Balance should be equal to COINBASE_REWARD but got", amount)
+	}
+
+	if len(chain.UTXO.Outputs) != 2 {
+		t.Error("UTXO should have 2 output ")
+	}
+
+	chain.AddBlock()
+	if len(chain.UTXO.Outputs) != 3 {
+		t.Error("UTXO should have 3 output ")
+	}
+
+}
+
+func TestBlockchain_AddBlock2(t *testing.T) {
+	walletA := wallet.NewWallet()
+	chain := InitBlockchain(walletA.BlockchainAddress(), 3000)
+
+	block := chain.AddBlock()
+
+	pow := NewProofOfWork(block)
+	valid := pow.IsValid(block.Nonce)
+
+	if !valid {
+		t.Error("Block should be valid")
+	}
+
 }

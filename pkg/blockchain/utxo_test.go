@@ -6,8 +6,8 @@ func TestUTXO_AddOutput(t *testing.T) {
 	utxo := NewUTXO()
 	output := NewOutput(TxOutput{Value: 10.0, PublicKey: "public_key"}, 0, "txID", 0)
 	utxo.AddOutput(output)
-	if len(utxo.outputs) != 1 {
-		t.Errorf("Expected 1 output, got %d", len(utxo.outputs))
+	if len(utxo.Outputs) != 1 {
+		t.Errorf("Expected 1 output, got %d", len(utxo.Outputs))
 	}
 }
 
@@ -16,7 +16,7 @@ func TestUTXO_SpendOutput(t *testing.T) {
 	output := NewOutput(TxOutput{Value: 10.0, PublicKey: "public_key"}, 0, "txID", 0)
 	utxo.AddOutput(output)
 	utxo.SpendOutput(output.Hash())
-	if !utxo.isSpent[output.Hash()] {
+	if !utxo.IsSpent[output.Hash()] {
 		t.Errorf("Expected hash to be spent")
 	}
 }

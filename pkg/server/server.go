@@ -59,11 +59,8 @@ func (s *Server) Run() {
 	s.initHandlers()
 	s.connectToKnownNodes()
 	s.getBlockchain()
-
-	//s.AddNode("localhost:" + strconv.Itoa(int(s.Port())))
-	//s.SearchNodes()
+	s.startMining()
 	//s.SyncChains()
-	//s.MineBlock()
 	fmt.Printf("Listening on: http//:localhost:%d\n", s.Port())
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+strconv.Itoa(int(s.Port())), nil))
 
