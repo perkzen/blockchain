@@ -60,4 +60,5 @@ go run cmd/main.go balance -node 3000
 - [ ] Difficulty adjustment
 - [ ] Support for multiple wallets
 - [ ] add CLI commands to view chain
+- [ ] better chain and transaction validation
 
